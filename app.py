@@ -1,36 +1,21 @@
-import os
-import sqlite3
+﻿import os
 import time
 import uuid
-from datetime import date, datetime, timedelta
-from typing import Optional
+from datetime import date, datetime
 
 import yfinance as yf
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-BASE = os.path.dirname(os.path.abspath(__file__))
-def _db_path():
-    for p in (os.path.join(BASE, "data", "merprest.db"), os.path.join("/tmp", "merprest.db")):
-        try:
-            os.makedirs(os.path.dirname(p), exist_ok=True)
-            with open(p, "a", encoding="utf-8"):
-                pass
-            return p
-        except Exception:
-            continue
-    return os.path.join("/tmp", "merprest.db")
-DB_PATH = _db_path()
+import db
 
+BASE = os.path.dirname(os.path.abspath(__file__))
 app = FastAPI(title="MerPrest Capital")
 
 # ---------------------------------------------------------------- DB
 def get_db():
-    con = sqlite3.connect(DB_PATH)
-    con.row_factory = sqlite3.Row
-    con.execute("PRAGMA foreign_keys = ON")
-    return con
+    return db.connect()
 
 def seed():
     con = get_db()
@@ -60,14 +45,14 @@ def seed():
     CREATE TABLE IF NOT EXISTS snapshots (day TEXT PRIMARY KEY, value REAL);
     """)
     if not con.execute("SELECT 1 FROM accounts").fetchone():
-        con.execute("INSERT INTO accounts (id, cash, savings, savings_rate, last_interest_date) VALUES (1, 10000, 0, 0.06, ?)", (today(),))
+        con.execute("INSERT INTO accounts (id, cash, savings, savings_rate, last_interest_date) VALUES (1, 10000, 0, 0.06, %s)", (today(),))
         demo = [
             ("Empresa Andina SAC", "20100012345", "finanzas@andina.pe", "+51 1 555 0101"),
             ("TechSoluciones EIRL", "20600067890", "contabilidad@techsol.pe", "+51 1 555 0202"),
             ("AgroInversiones Norte", "20450098765", "cobranzas@agronorte.pe", "+51 73 555 0303"),
         ]
         for name, ruc, email, phone in demo:
-            con.execute("INSERT INTO companies VALUES (?,?,?,?,?,0,?)", (uuid.uuid4().hex, name, ruc, email, phone, today()))
+            con.execute("INSERT INTO companies VALUES (%s,%s,%s,%s,%s,0,%s)", (uuid.uuid4().hex, name, ruc, email, phone, today()))
     con.commit()
     con.close()
 
@@ -89,7 +74,7 @@ def add_months(d: str, m: int) -> str:
     return f"{year:04d}-{month:02d}-{day:02d}"
 
 def log(con, type_, amount, symbol=None, detail=None):
-    con.execute("INSERT INTO ledger (id, ts, type, symbol, amount, detail) VALUES (?,?,?,?,?,?)",
+    con.execute("INSERT INTO ledger (id, ts, type, symbol, amount, detail) VALUES (%s,%s,%s,%s,%s,%s)",
                 (uid(), datetime.now().isoformat(timespec="seconds"), type_, symbol, r2(amount), detail))
 
 def french_schedule(amount, annual_rate, months, start):
@@ -201,8 +186,8 @@ def apply_savings_interest(con):
         if days > 0:
             interest = r2(acc["savings"] * acc["savings_rate"] / 365 * days)
             if interest > 0.005:
-                con.execute("UPDATE accounts SET savings=savings+?, last_interest_date=? WHERE id=1", (interest, today()))
-                log(con, "savings_interest", interest, detail="Interés del colchón")
+                con.execute("UPDATE accounts SET savings=savings+%s, last_interest_date=%s WHERE id=1", (interest, today()))
+                log(con, "savings_interest", interest, detail="InterÃ©s del colchÃ³n")
 
 def account(con):
     apply_savings_interest(con)
@@ -228,12 +213,12 @@ def positions_with_prices():
     return sorted(out, key=lambda x: -x["marketValue"])
 
 def loan_outstanding(con, loan_id, amount):
-    rows = con.execute("SELECT total, paid_amount, principal FROM installments WHERE loan_id=?", (loan_id,)).fetchall()
+    rows = con.execute("SELECT total, paid_amount, principal FROM installments WHERE loan_id=%s", (loan_id,)).fetchall()
     paid_principal = sum(r2(r["principal"] * min(r["paid_amount"], r["total"]) / r["total"]) if r["total"] else 0 for r in rows)
     return r2(max(0, amount - paid_principal))
 
 def loan_summary(con, loan):
-    rows = con.execute("SELECT paid_amount, total, principal, due_date FROM installments WHERE loan_id=?", (loan["id"],)).fetchall()
+    rows = con.execute("SELECT paid_amount, total, principal, due_date FROM installments WHERE loan_id=%s", (loan["id"],)).fetchall()
     if loan["status"] == "requested" or not rows:
         status = "requested" if loan["status"] == "requested" else "active"
     elif all(r["paid_amount"] >= r["total"] - 0.005 for r in rows):
@@ -285,7 +270,7 @@ def overview():
     pos = positions_with_prices()
     invest_value = r2(sum(p["marketValue"] for p in pos))
     total = r2(acc["cash"] + acc["savings"] + invest_value)
-    con.execute("INSERT OR IGNORE INTO snapshots (day, value) VALUES (?,?)", (today(), total))
+    con.execute("INSERT INTO snapshots (day, value) VALUES (%s,%s) ON CONFLICT (day) DO NOTHING", (today(), total))
     con.commit()
     rows = con.execute("SELECT * FROM ledger ORDER BY ts DESC LIMIT 12").fetchall()
     con.close()
@@ -344,17 +329,17 @@ def trade(body: TradeIn):
         if total > acc["cash"] + 0.005:
             con.close()
             raise HTTPException(400, "Efectivo insuficiente para la compra")
-        cur = con.execute("SELECT * FROM positions WHERE symbol=?", (body.symbol,)).fetchone()
+        cur = con.execute("SELECT * FROM positions WHERE symbol=%s", (body.symbol,)).fetchone()
         old_qty = cur["qty"] if cur else 0
         old_cost = cur["avg_cost"] if cur else 0
         new_qty = old_qty + body.qty
         avg = r2((old_qty * old_cost + gross + fee) / new_qty)
-        con.execute("INSERT INTO positions (symbol, qty, avg_cost) VALUES (?,?,?) ON CONFLICT(symbol) DO UPDATE SET qty=?, avg_cost=?",
+        con.execute("INSERT INTO positions (symbol, qty, avg_cost) VALUES (%s,%s,%s) ON CONFLICT(symbol) DO UPDATE SET qty=%s, avg_cost=%s",
                     (body.symbol, new_qty, avg, new_qty, avg))
-        con.execute("UPDATE accounts SET cash=cash-? WHERE id=1", (total,))
+        con.execute("UPDATE accounts SET cash=cash-%s WHERE id=1", (total,))
         pnl = 0
     else:
-        cur = con.execute("SELECT * FROM positions WHERE symbol=?", (body.symbol,)).fetchone()
+        cur = con.execute("SELECT * FROM positions WHERE symbol=%s", (body.symbol,)).fetchone()
         if not cur or cur["qty"] < body.qty - 0.0001:
             con.close()
             raise HTTPException(400, f"No tienes {body.qty} de {body.symbol}")
@@ -362,12 +347,12 @@ def trade(body: TradeIn):
         pnl = r2(revenue - cur["avg_cost"] * body.qty)
         new_qty = r2(cur["qty"] - body.qty)
         if new_qty <= 0.0001:
-            con.execute("DELETE FROM positions WHERE symbol=?", (body.symbol,))
+            con.execute("DELETE FROM positions WHERE symbol=%s", (body.symbol,))
         else:
-            con.execute("UPDATE positions SET qty=? WHERE symbol=?", (new_qty, body.symbol))
-        con.execute("UPDATE accounts SET cash=cash+? WHERE id=1", (revenue,))
+            con.execute("UPDATE positions SET qty=%s WHERE symbol=%s", (new_qty, body.symbol))
+        con.execute("UPDATE accounts SET cash=cash+%s WHERE id=1", (revenue,))
         total = -revenue
-    con.execute("INSERT INTO trades (id, symbol, side, qty, price, total, fee, pnl, executed_at) VALUES (?,?,?,?,?,?,?,?,?)",
+    con.execute("INSERT INTO trades (id, symbol, side, qty, price, total, fee, pnl, executed_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                 (uid(), body.symbol, body.side, body.qty, price, r2(gross), fee, pnl, datetime.now().isoformat(timespec="seconds")))
     log(con, "trade_" + body.side, total, body.symbol, detail=f"{'Compra' if body.side=='buy' else 'Venta'} {body.qty} {body.symbol}")
     con.commit()
@@ -382,15 +367,15 @@ def savings(body: SavingsIn):
     if body.action == "deposit":
         if amount > acc["cash"] + 0.005:
             con.close()
-            raise HTTPException(400, "Efectivo insuficiente para guardar en el colchón")
-        con.execute("UPDATE accounts SET cash=cash-?, savings=savings+? WHERE id=1", (amount, amount))
-        log(con, "savings_deposit", -amount, detail="Guardado en el colchón")
+            raise HTTPException(400, "Efectivo insuficiente para guardar en el colchÃ³n")
+        con.execute("UPDATE accounts SET cash=cash-%s, savings=savings+%s WHERE id=1", (amount, amount))
+        log(con, "savings_deposit", -amount, detail="Guardado en el colchÃ³n")
     else:
         if amount > acc["savings"] + 0.005:
             con.close()
-            raise HTTPException(400, "No hay tanto guardado en el colchón")
-        con.execute("UPDATE accounts SET cash=cash+?, savings=savings-? WHERE id=1", (amount, amount))
-        log(con, "savings_withdraw", amount, detail="Retiro del colchón")
+            raise HTTPException(400, "No hay tanto guardado en el colchÃ³n")
+        con.execute("UPDATE accounts SET cash=cash+%s, savings=savings-%s WHERE id=1", (amount, amount))
+        log(con, "savings_withdraw", amount, detail="Retiro del colchÃ³n")
     con.commit()
     acc = account(con)
     con.close()
@@ -410,7 +395,7 @@ def companies():
 def add_company(body: CompanyIn):
     con = get_db()
     cid = uid()
-    con.execute("INSERT INTO companies (id, name, ruc, contact_email, contact_phone, balance, created_at) VALUES (?,?,?,?,?,0,?)",
+    con.execute("INSERT INTO companies (id, name, ruc, contact_email, contact_phone, balance, created_at) VALUES (%s,%s,%s,%s,%s,0,%s)",
                 (cid, body.name, body.ruc, body.contact_email, body.contact_phone, today()))
     con.commit()
     con.close()
@@ -427,11 +412,11 @@ def loans_list():
 @app.post("/api/loans")
 def create_loan(body: LoanIn):
     con = get_db()
-    if not con.execute("SELECT 1 FROM companies WHERE id=?", (body.company_id,)).fetchone():
+    if not con.execute("SELECT 1 FROM companies WHERE id=%s", (body.company_id,)).fetchone():
         con.close()
         raise HTTPException(404, "Empresa no encontrada")
     lid = uid()
-    con.execute("INSERT INTO loans (id, company_id, amount, annual_rate, term_months, start_date, status, created_at) VALUES (?,?,?,?,?,NULL,'requested',?)",
+    con.execute("INSERT INTO loans (id, company_id, amount, annual_rate, term_months, start_date, status, created_at) VALUES (%s,%s,%s,%s,%s,NULL,'requested',%s)",
                 (lid, body.company_id, body.amount, body.annual_rate, body.term_months, today()))
     con.commit()
     con.close()
@@ -440,16 +425,16 @@ def create_loan(body: LoanIn):
 @app.post("/api/loans/{loan_id}/disburse")
 def disburse(loan_id: str):
     con = get_db()
-    loan = con.execute("SELECT * FROM loans WHERE id=?", (loan_id,)).fetchone()
+    loan = con.execute("SELECT * FROM loans WHERE id=%s", (loan_id,)).fetchone()
     if not loan or loan["status"] != "requested":
         con.close()
-        raise HTTPException(404, "Préstamo no encontrado o ya desembolsado")
+        raise HTTPException(404, "PrÃ©stamo no encontrado o ya desembolsado")
     for inst in french_schedule(loan["amount"], loan["annual_rate"], loan["term_months"], today()):
-        con.execute("INSERT INTO installments (id, loan_id, number, due_date, principal, interest, total, balance, paid_amount) VALUES (?,?,?,?,?,?,?,?,0)", (inst[0], loan_id) + inst[1:])
-    con.execute("UPDATE loans SET status='active', start_date=? WHERE id=?", (today(), loan_id))
-    con.execute("UPDATE accounts SET cash=cash-? WHERE id=1", (loan["amount"],))
-    con.execute("UPDATE companies SET balance=balance+? WHERE id=?", (loan["amount"], loan["company_id"]))
-    log(con, "loan_disbursement", -loan["amount"], detail=f"Desembolso préstamo {loan['amount']:,.2f}")
+        con.execute("INSERT INTO installments (id, loan_id, number, due_date, principal, interest, total, balance, paid_amount) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,0)", (inst[0], loan_id) + inst[1:])
+    con.execute("UPDATE loans SET status='active', start_date=%s WHERE id=%s", (today(), loan_id))
+    con.execute("UPDATE accounts SET cash=cash-%s WHERE id=1", (loan["amount"],))
+    con.execute("UPDATE companies SET balance=balance+%s WHERE id=%s", (loan["amount"], loan["company_id"]))
+    log(con, "loan_disbursement", -loan["amount"], detail=f"Desembolso prÃ©stamo {loan['amount']:,.2f}")
     con.commit()
     con.close()
     return {"ok": True}
@@ -457,17 +442,17 @@ def disburse(loan_id: str):
 @app.post("/api/loans/{loan_id}/delete")
 def delete_loan(loan_id: str):
     con = get_db()
-    loan = con.execute("SELECT * FROM loans WHERE id=?", (loan_id,)).fetchone()
+    loan = con.execute("SELECT * FROM loans WHERE id=%s", (loan_id,)).fetchone()
     if not loan:
         con.close()
-        raise HTTPException(404, "Préstamo no encontrado")
+        raise HTTPException(404, "PrÃ©stamo no encontrado")
     if loan["status"] != "requested":
         outstanding = loan_outstanding(con, loan_id, loan["amount"])
-        con.execute("UPDATE accounts SET cash=cash+? WHERE id=1", (outstanding,))
-        con.execute("UPDATE companies SET balance=balance-? WHERE id=?", (outstanding, loan["company_id"]))
-        log(con, "loan_reversal", outstanding, detail=f"Eliminación de préstamo (capital pendiente)")
-    con.execute("DELETE FROM installments WHERE loan_id=?", (loan_id,))
-    con.execute("DELETE FROM loans WHERE id=?", (loan_id,))
+        con.execute("UPDATE accounts SET cash=cash+%s WHERE id=1", (outstanding,))
+        con.execute("UPDATE companies SET balance=balance-%s WHERE id=%s", (outstanding, loan["company_id"]))
+        log(con, "loan_reversal", outstanding, detail=f"EliminaciÃ³n de prÃ©stamo (capital pendiente)")
+    con.execute("DELETE FROM installments WHERE loan_id=%s", (loan_id,))
+    con.execute("DELETE FROM loans WHERE id=%s", (loan_id,))
     con.commit()
     con.close()
     return {"ok": True}
@@ -475,11 +460,11 @@ def delete_loan(loan_id: str):
 @app.get("/api/loans/{loan_id}")
 def loan_detail(loan_id: str):
     con = get_db()
-    loan = con.execute("SELECT l.*, c.name AS company_name FROM loans l JOIN companies c ON c.id=l.company_id WHERE l.id=?", (loan_id,)).fetchone()
+    loan = con.execute("SELECT l.*, c.name AS company_name FROM loans l JOIN companies c ON c.id=l.company_id WHERE l.id=%s", (loan_id,)).fetchone()
     if not loan:
         con.close()
-        raise HTTPException(404, "Préstamo no encontrado")
-    insts = con.execute("SELECT * FROM installments WHERE loan_id=? ORDER BY number", (loan_id,)).fetchall()
+        raise HTTPException(404, "PrÃ©stamo no encontrado")
+    insts = con.execute("SELECT * FROM installments WHERE loan_id=%s ORDER BY number", (loan_id,)).fetchall()
     con.close()
     out = loan_summary(get_db(), loan)
     detail = []
@@ -500,7 +485,7 @@ def loan_detail(loan_id: str):
 @app.post("/api/payments")
 def pay_installment(body: PaymentIn):
     con = get_db()
-    inst = con.execute("SELECT * FROM installments WHERE id=?", (body.installment_id,)).fetchone()
+    inst = con.execute("SELECT * FROM installments WHERE id=%s", (body.installment_id,)).fetchone()
     if not inst:
         con.close()
         raise HTTPException(404, "Cuota no encontrada")
@@ -509,16 +494,16 @@ def pay_installment(body: PaymentIn):
         con.close()
         raise HTTPException(400, f"El pago excede lo pendiente de la cuota ({pending:,.2f})")
     amount = r2(body.amount)
-    con.execute("UPDATE installments SET paid_amount=paid_amount+? WHERE id=?", (amount, inst["id"]))
-    con.execute("INSERT INTO payments (id, installment_id, loan_id, amount, payment_date, method, reference) VALUES (?,?,?,?,?,?,?)",
+    con.execute("UPDATE installments SET paid_amount=paid_amount+%s WHERE id=%s", (amount, inst["id"]))
+    con.execute("INSERT INTO payments (id, installment_id, loan_id, amount, payment_date, method, reference) VALUES (%s,%s,%s,%s,%s,%s,%s)",
                 (uid(), inst["id"], inst["loan_id"], amount, today(), body.method, body.reference))
-    con.execute("UPDATE accounts SET cash=cash+? WHERE id=1", (amount,))
-    con.execute("UPDATE companies SET balance=MAX(balance-?,0) WHERE id=?",
-                (amount, con.execute("SELECT company_id FROM loans WHERE id=?", (inst["loan_id"],)).fetchone()["company_id"]))
-    log(con, "loan_payment", amount, detail=f"Pago de cuota #{inst['number']} del préstamo")
-    all_paid = con.execute("SELECT COUNT(*) c FROM installments WHERE loan_id=? AND paid_amount < total-0.005", (inst["loan_id"],)).fetchone()["c"] == 0
+    con.execute("UPDATE accounts SET cash=cash+%s WHERE id=1", (amount,))
+    con.execute("UPDATE companies SET balance=GREATEST(balance-%s,0) WHERE id=%s",
+                (amount, con.execute("SELECT company_id FROM loans WHERE id=%s", (inst["loan_id"],)).fetchone()["company_id"]))
+    log(con, "loan_payment", amount, detail=f"Pago de cuota #{inst['number']} del prÃ©stamo")
+    all_paid = con.execute("SELECT COUNT(*) c FROM installments WHERE loan_id=%s AND paid_amount < total-0.005", (inst["loan_id"],)).fetchone()["c"] == 0
     if all_paid:
-        con.execute("UPDATE loans SET status='paid' WHERE id=?", (inst["loan_id"],))
+        con.execute("UPDATE loans SET status='paid' WHERE id=%s", (inst["loan_id"],))
     con.commit()
     con.close()
     return {"ok": True}
@@ -536,11 +521,11 @@ def reports():
     loans = con.execute("SELECT l.*, c.name AS company_name FROM loans l JOIN companies c ON c.id=l.company_id").fetchall()
     total_lent = sum(l["amount"] for l in loans if l["status"] != "requested")
     outstanding = sum(loan_outstanding(con, l["id"], l["amount"]) for l in loans if l["status"] not in ("requested", "paid"))
-    interest_paid = con.execute("SELECT COALESCE(SUM(i.paid_amount),0) FROM installments i").fetchone()[0]
+    interest_paid = con.execute("SELECT COALESCE(SUM(i.paid_amount),0) AS v FROM installments i").fetchone()["v"]
     interest_earned = r2(sum(
-        sum(r2(i["paid_amount"] - i["principal"] * min(i["paid_amount"], i["total"]) / i["total"]) for i in con.execute("SELECT * FROM installments WHERE loan_id=?", (l["id"],)).fetchall()) for l in loans))
+        sum(r2(i["paid_amount"] - i["principal"] * min(i["paid_amount"], i["total"]) / i["total"]) for i in con.execute("SELECT * FROM installments WHERE loan_id=%s", (l["id"],)).fetchall()) for l in loans))
     trade_stats = con.execute("SELECT COALESCE(SUM(pnl),0) pnl, COUNT(*) n FROM trades").fetchone()
-    fees = con.execute("SELECT COALESCE(SUM(fee),0) FROM trades").fetchone()[0]
+    fees = con.execute("SELECT COALESCE(SUM(fee),0) AS v FROM trades").fetchone()["v"]
     per_symbol = con.execute("SELECT symbol, SUM(qty*price) volume, SUM(pnl) pnl, COUNT(*) trades FROM trades GROUP BY symbol ORDER BY volume DESC").fetchall()
     con.close()
     return {"totalLent": r2(total_lent), "outstanding": r2(outstanding), "interestEarned": interest_earned,

@@ -9,3 +9,5 @@ venv/
 .vscode/
 .vercel/
 *.log
+
+.env*
