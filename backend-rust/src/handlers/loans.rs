@@ -79,7 +79,7 @@ pub async fn create(
     State(pool): State<PgPool>,
     Json(body): Json<CreateLoan>,
 ) -> ApiResult<(StatusCode, Json<LoanDetail>)> {
-    let currency = body.currency.unwrap_or_else(|| "PEN".to_string());
+    let currency = body.currency.unwrap_or_else(|| "USD".to_string());
     let start_date = body
         .start_date
         .unwrap_or_else(|| chrono::Utc::now().date_naive());

@@ -31,7 +31,7 @@ Respuesta de `POST /api/loans` y `GET /api/loans/:id`:
   "annual_rate": "0.1200",
   "term_months": 12,
   "start_date": "2026-08-07",
-  "currency": "PEN",
+  "currency": "USD",
   "status": "active",
   "installments": [
     {

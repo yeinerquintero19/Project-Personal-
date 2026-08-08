@@ -103,7 +103,7 @@ function openLoanForm(container: HTMLElement): void {
         </select>
       </label>
       <div class="form-row">
-        <label>Monto (PEN)
+        <label>Monto (US$)
           <input name="amount" type="number" step="0.01" min="1" required value="10000" />
         </label>
         <label>Tasa anual (%)

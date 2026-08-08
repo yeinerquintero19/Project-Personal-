@@ -152,14 +152,14 @@ function seed(){
 function savePaymentsForSeed(i){ i.payments = [{ id: uid(), amount: i.total, payment_date: i.due_date, method: "bank_transfer", reference: "Pago inicial" }]; }
 function makeLoan(company_id, amount, annualRate, months, start){
   const installments = frenchSchedule(amount, annualRate, months, start).map(i => ({ ...i, loan_id: "" }));
-  const l = { id: uid(), company_id, amount, annual_rate: annualRate, term_months: months, start_date: start, currency: "PEN", created_at: today(), installments: installments.map(i => ({ ...i, loan_id: uid() })) };
+  const l = { id: uid(), company_id, amount, annual_rate: annualRate, term_months: months, start_date: start, currency: "USD", created_at: today(), installments: installments.map(i => ({ ...i, loan_id: uid() })) };
   l.installments.forEach(i => i.loan_id = l.id);
   return l;
 }
 function companyOf(l){ return db.companies.find(c => c.id === l.company_id); }
 
 /* ============ Formato / UI ============ */
-const money = (v, cur="PEN") => (cur === "USD" ? "US$ " : "S/ ") + Number(v).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money = (v, cur="USD") => (cur === "USD" ? "US$ " : "S/ ") + Number(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const pct = v => (Number(v) * 100).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
 const fmtDate = s => { const [y,m,d] = String(s).slice(0,10).split("-"); return d + "/" + m + "/" + y; };
 function badge(s){ const l = { active:"Activo", paid:"Pagado", late:"Vencido", pending:"Pendiente" }[s] || s; return `<span class="badge badge-${s}">${l}</span>`; }
@@ -207,7 +207,7 @@ function renderLoans(v){
     const d = openModal(`<form method="dialog" class="modal-body" id="lf">
       <h3>Nuevo préstamo</h3>
       <label>Empresa<select name="company_id">${db.companies.map(c => `<option value="${c.id}">${c.name}</option>`).join("")}</select></label>
-      <div class="form-row"><label>Monto (PEN)<input name="amount" type="number" min="1" step="0.01" required value="10000"></label>
+      <div class="form-row"><label>Monto (US$)<input name="amount" type="number" min="1" step="0.01" required value="10000"></label>
       <label>Tasa anual (%)<input name="rate" type="number" min="0.1" max="100" step="0.01" required value="12"></label></div>
       <div class="form-row"><label>Plazo (meses)<input name="months" type="number" min="1" max="360" required value="12"></label>
       <label>Desembolso<input name="start" type="date" required value="${today()}"></label></div>

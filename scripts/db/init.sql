@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS loans (
     annual_rate  NUMERIC(6,4)  NOT NULL CHECK (annual_rate > 0),
     term_months  INT           NOT NULL CHECK (term_months BETWEEN 1 AND 360),
     start_date   DATE          NOT NULL DEFAULT CURRENT_DATE,
-    currency     VARCHAR(3)    NOT NULL DEFAULT 'PEN',
+    currency     VARCHAR(3)    NOT NULL DEFAULT 'USD',
     status       VARCHAR(10)   NOT NULL DEFAULT 'active'
                  CHECK (status IN ('active', 'paid')),
     created_at   TIMESTAMPTZ   NOT NULL DEFAULT now()

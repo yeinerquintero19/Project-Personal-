@@ -1,4 +1,4 @@
-export function money(value: string | number, currency = "PEN"): string {
+export function money(value: string | number, currency = "USD"): string {
   const n = typeof value === "string" ? Number(value) : value;
   const symbol = currency === "USD" ? "US$" : "S/";
   return `${symbol} ${n.toLocaleString("es-PE", {
