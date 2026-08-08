@@ -60,6 +60,14 @@ npm run dev
 
 Abrir http://localhost:5173
 
+## Versión demo sin servidor
+
+`merprest-standalone.html` es la app completa en **un solo archivo HTML**: no
+necesita Docker, Rust, Python ni Node. Solo abrirla en el navegador (doble
+clic); guarda los datos en el `localStorage` del navegador y trae datos de
+ejemplo. Ideal para probar o para desplegar en Vercel/Netlify como sitio
+estático.
+
 ## Automatización
 
 ```bash

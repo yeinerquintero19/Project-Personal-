@@ -1,0 +1,19 @@
+# Dependencias (no se suben)
+node_modules
+backend-rust/target
+backend-python/.venv
+.venv
+
+# Builds locales
+frontend/dist
+
+# Entornos
+.env
+backend-rust/.env
+backend-python/.env
+
+# Git e IDE
+.git
+.gitignore
+.idea
+.vscode

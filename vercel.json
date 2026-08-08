@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "name": "merprest",
+  "rewrites": [
+    { "source": "/", "destination": "/merprest-standalone" }
+  ],
+  "cleanUrls": true
+}
