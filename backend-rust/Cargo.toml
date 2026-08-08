@@ -1,8 +1,8 @@
 [package]
-name = "prestapro-backend"
+name = "merprest-backend"
 version = "0.1.0"
 edition = "2021"
-description = "PrestaPro - API de préstamos para empresas"
+description = "MerPrest - API de préstamos para empresas"
 
 [dependencies]
 axum = "0.7"

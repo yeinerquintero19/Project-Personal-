@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     database_url: str = (
-        "postgres://prestapro:prestapro_secret@localhost:5432/prestapro"
+        "postgres://merprest:merprest_secret@localhost:5432/merprest"
     )
     host: str = "0.0.0.0"
     port: int = 8000

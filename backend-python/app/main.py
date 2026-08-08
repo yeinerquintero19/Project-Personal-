@@ -1,4 +1,4 @@
-"""PrestaPro - Servicio de reportes y análisis (FastAPI)."""
+"""MerPrest - Servicio de reportes y análisis (FastAPI)."""
 
 from contextlib import asynccontextmanager
 
@@ -14,13 +14,13 @@ from .routers import reports
 async def lifespan(_: FastAPI):
     settings = get_settings()
     init_pool(settings.database_url)
-    print(f"[prestapro-python] Conectado a PostgreSQL (pool listo)")
+    print(f"[merprest-python] Conectado a PostgreSQL (pool listo)")
     yield
     close_pool()
 
 
 app = FastAPI(
-    title="PrestaPro - Reportes API",
+    title="MerPrest - Reportes API",
     description="Servicio de reportes y análisis financiero del portafolio de préstamos.",
     version="0.1.0",
     lifespan=lifespan,

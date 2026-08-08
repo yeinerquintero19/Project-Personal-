@@ -1,4 +1,4 @@
-# PrestaPro
+# MerPrest
 
 Sistema de gestión de préstamos para empresas: portafolio, cuotas, pagos y reportes.
 

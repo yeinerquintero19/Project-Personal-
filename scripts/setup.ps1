@@ -1,5 +1,5 @@
 # =============================================================
-# PrestaPro - Script de setup e instalación (Windows / PowerShell)
+# MerPrest - Script de setup e instalación (Windows / PowerShell)
 # Uso: powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 # =============================================================
 

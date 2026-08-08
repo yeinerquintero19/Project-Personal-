@@ -1,5 +1,5 @@
 -- =============================================================
--- PrestaPro - Esquema inicial de la base de datos (PostgreSQL)
+-- MerPrest - Esquema inicial de la base de datos (PostgreSQL)
 -- Se ejecuta automáticamente la primera vez que se levanta el
 -- contenedor de PostgreSQL via docker-entrypoint-initdb.d.
 -- =============================================================

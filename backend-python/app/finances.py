@@ -1,4 +1,4 @@
-"""Cálculos financieros para los reportes de PrestaPro."""
+"""Cálculos financieros para los reportes de MerPrest."""
 
 from __future__ import annotations
 

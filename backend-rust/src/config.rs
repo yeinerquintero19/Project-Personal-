@@ -11,7 +11,7 @@ impl Config {
     pub fn from_env() -> Self {
         Self {
             database_url: env::var("DATABASE_URL")
-                .unwrap_or_else(|_| "postgres://prestapro:prestapro_secret@localhost:5432/prestapro".to_string()),
+                .unwrap_or_else(|_| "postgres://merprest:merprest_secret@localhost:5432/merprest".to_string()),
             host: env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string()),
             port: env::var("PORT")
                 .ok()

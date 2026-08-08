@@ -9,7 +9,7 @@ use serde_json::{json, Value};
 pub async fn health() -> Json<Value> {
     Json(json!({
         "status": "ok",
-        "service": "prestapro-rust",
+        "service": "merprest-rust",
         "version": env!("CARGO_PKG_VERSION"),
     }))
 }

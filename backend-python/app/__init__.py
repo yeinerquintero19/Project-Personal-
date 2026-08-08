@@ -1,3 +1,3 @@
-"""PrestaPro - Backend de reportes (Python + FastAPI)."""
+"""MerPrest - Backend de reportes (Python + FastAPI)."""
 
 __version__ = "0.1.0"

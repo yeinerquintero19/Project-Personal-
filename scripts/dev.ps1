@@ -1,5 +1,5 @@
 # =============================================================
-# PrestaPro - Script de desarrollo (Windows / PowerShell)
+# MerPrest - Script de desarrollo (Windows / PowerShell)
 # Levanta los 3 servicios en ventanas separadas.
 # =============================================================
 

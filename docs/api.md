@@ -71,7 +71,7 @@ Reglas:
 
 | Método | Ruta    | Descripción                          |
 | ------ | ------- | ------------------------------------ |
-| GET    | /health | `{status: "ok", service: "prestapro-rust"}` |
+| GET    | /health | `{status: "ok", service: "merprest-rust"}` |
 
 ---
 

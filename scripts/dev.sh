@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================
-# PrestaPro - Script de desarrollo (Linux/macOS/Git Bash)
+# MerPrest - Script de desarrollo (Linux/macOS/Git Bash)
 # Levanta los 3 servicios con logs en consola.
 # =============================================================
 set -euo pipefail

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================
-# PrestaPro - Script de setup e instalación (Linux/macOS/Git Bash)
+# MerPrest - Script de setup e instalación (Linux/macOS/Git Bash)
 # Uso: ./scripts/setup.sh
 # =============================================================
 set -euo pipefail

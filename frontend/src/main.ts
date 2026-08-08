@@ -24,7 +24,7 @@ function navigate(): void {
   });
 
   const titleEl = document.getElementById("page-title");
-  if (titleEl) titleEl.textContent = titles[route] ?? "PrestaPro";
+  if (titleEl) titleEl.textContent = titles[route] ?? "MerPrest";
 
   switch (route) {
     case "loans":

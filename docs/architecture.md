@@ -2,7 +2,7 @@
 
 ## Visión general
 
-PrestaPro es un sistema de gestión de préstamos entre empresas con una
+MerPrest es un sistema de gestión de préstamos entre empresas con una
 arquitectura de **microservicios ligeros** en un monorepo:
 
 ```

@@ -315,4 +315,4 @@ def amortization_table(
 
 @router.get("/health")
 def health() -> dict:
-    return {"status": "ok", "service": "prestapro-python", "version": "0.1.0"}
+    return {"status": "ok", "service": "merprest-python", "version": "0.1.0"}

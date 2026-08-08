@@ -1,5 +1,5 @@
 # =============================================================
-# PrestaPro - Atajos de desarrollo
+# MerPrest - Atajos de desarrollo
 # =============================================================
 
 .PHONY: setup db rust python frontend dev build lint
