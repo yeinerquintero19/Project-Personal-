@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MerPrest · Capital</title>
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">₲</div>
+      <div>
+        <div class="brand-name">MerPrest</div>
+        <div class="brand-sub">Finanzas · Inversiones</div>
+      </div>
+    </div>
+    <div class="nav-label">Menú</div>
+    <nav class="nav">
+      <a href="#/dashboard" data-nav="dashboard" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span class="nav-text">Panel</span>
+      </a>
+      <a href="#/invest" data-nav="invest" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+        <span class="nav-text">Inversiones</span>
+      </a>
+      <a href="#/loans" data-nav="loans" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span class="nav-text">Préstamos</span>
+      </a>
+      <a href="#/companies" data-nav="companies" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></svg>
+        <span class="nav-text">Empresas</span>
+      </a>
+      <a href="#/savings" data-nav="savings" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+        <span class="nav-text">Colchón</span>
+      </a>
+      <a href="#/reports" data-nav="reports" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15v-4"/><path d="M12 15V7"/><path d="M17 15v-6"/></svg>
+        <span class="nav-text">Reportes</span>
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <span>Mercado real · Yahoo Finance</span>
+      <button class="reset-btn" onclick="resetApp()">↺ Reiniciar todo</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 id="page-title">Panel</h1>
+        <div class="net-worth" id="net-worth">—</div>
+      </div>
+      <div class="topbar-right">
+        <div class="pill" title="Efectivo disponible"><span class="pill-label">Efectivo</span><span class="pill-value" id="pill-cash">—</span></div>
+        <div class="pill" title="Guardado en el colchón"><span class="pill-label">Colchón</span><span class="pill-value" id="pill-savings">—</span></div>
+        <div class="pill" title="Valor de inversiones"><span class="pill-label">Inversiones</span><span class="pill-value" id="pill-invest">—</span></div>
+        <span class="clock" id="clock"></span>
+      </div>
+    </header>
+    <div id="view"></div>
+  </main>
+</div>
+<div id="toast-root"></div>
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

@@ -1,8 +1,11 @@
 {
-  "version": 2,
-  "name": "merprest",
-  "rewrites": [
-    { "source": "/", "destination": "/merprest-standalone" }
-  ],
-  "cleanUrls": true
+  "buildCommand": null,
+  "devCommand": null,
+  "framework": null,
+  "installCommand": "pip install -r requirements.txt",
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 60
+    }
+  }
 }

@@ -1,32 +1,11 @@
-# Dependencias
-node_modules/
-target/
+data/
 __pycache__/
 *.pyc
+backend-rust/target/
+frontend/node_modules/
+frontend/dist/
 .venv/
 venv/
-
-# Entornos y secretos
-.env
-.env.local
-*.env.local
-
-# Builds
-dist/
-build/
-
-# Base de datos local
-*.db
-*.sqlite
-
-# Logs
-*.log
-logs/
-
-# IDE / SO
-.idea/
 .vscode/
-.DS_Store
-Thumbs.db
-
-.vercel
+.vercel/
+*.log
