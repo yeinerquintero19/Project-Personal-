@@ -139,9 +139,9 @@ async function renderDashboard(view) {
         <div id="equity-chart" style="height:300px;width:100%"></div>
       </div>
       <div class="card">
-        <div class="card-head"><h2>Mercado</h2><a class="link" href="#/invest">Operar →</a></div>
+        <div class="card-head"><h2>Mercado</h2><span class="dim" style="font-size:11px" id="market-live">—</span></div>
         <div class="table-wrap"><table class="table" style="min-width:0">
-          <tbody>${wl.symbols.slice(0, 6).map(s => `
+          <tbody id="market-tbody">${wl.symbols.slice(0, 6).map(s => `
             <tr style="cursor:pointer" onclick="location.hash='#/invest';state.invest.symbol='${s.symbol}';state.invest.range='6M'">
               <td><b style="font-size:13px">${esc(s.symbol)}</b><br/><span class="dim" style="font-size:11px">${esc(s.name)}</span></td>
               <td class="mono">${num(s.price)}</td>
@@ -790,9 +790,55 @@ async function renderReports(view) {
 }
 
 /* ================= Arranque ================= */
+let marketTimer = null;
+
+async function refreshMarketPrices() {
+  try {
+    const wl = await api("/api/watchlist");
+    const tb = $("#market-tbody");
+    if (tb) {
+      tb.innerHTML = wl.symbols.slice(0, 6).map(s => `
+        <tr style="cursor:pointer" onclick="location.hash='#/invest';state.invest.symbol='${s.symbol}';state.invest.range='6M'">
+          <td><b style="font-size:13px">${esc(s.symbol)}</b><br/><span class="dim" style="font-size:11px">${esc(s.name)}</span></td>
+          <td class="mono">${num(s.price)}</td>
+          <td class="mono ${deltaCls(s.changePct)}">${signedPct(s.changePct)}</td>
+          <td>${sparkSVG(s.spark)}</td>
+        </tr>`).join("");
+    }
+    const live = $("#market-live");
+    if (live) live.textContent = "· Actualizado " + new Date().toLocaleTimeString("es-PE");
+    const q = wl.symbols.find(s => s.symbol === state.invest.symbol);
+    if (state.view === "invest" && q) {
+      state.invest.price = q.price;
+      state.invest.prevClose = q.prevClose;
+      const chg = q.change, chgPct = q.changePct;
+      const pEl = $("#c-price");
+      if (pEl) {
+        pEl.textContent = num(q.price);
+        pEl.style.color = chg >= 0 ? "var(--up)" : "var(--down)";
+      }
+      const cEl = $("#c-change");
+      if (cEl) { cEl.textContent = signedPct(chgPct) + " (" + signed(num(chg)) + ")"; cEl.className = "mono " + deltaCls(chg); }
+      updateTradePreview();
+    }
+  } catch (e) { /* sin conexión, se reintenta en el próximo ciclo */ }
+}
+
+async function autoRefresh() {
+  await refreshTop();
+  if (state.view === "dashboard" || state.view === "invest") {
+    await refreshMarketPrices();
+  }
+  if (state.view === "dashboard") {
+    const view = $("#view");
+    if (view && !view.querySelector(".loading")) renderDashboard(view);
+  }
+}
+
 setInterval(() => {
   const c = $("#clock");
   if (c) c.textContent = nowISO();
 }, 1000);
+setInterval(autoRefresh, 30000);
 navigate();
 

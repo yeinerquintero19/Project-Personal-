@@ -150,7 +150,7 @@ def quotes():
             except Exception:
                 continue
         return out
-    return cached("quotes", 60, fetch)
+    return cached("quotes", 20, fetch)
 
 def sparklines():
     def fetch():
