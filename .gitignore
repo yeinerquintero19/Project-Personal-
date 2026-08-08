@@ -1,0 +1,30 @@
+# Dependencias
+node_modules/
+target/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Entornos y secretos
+.env
+.env.local
+*.env.local
+
+# Builds
+dist/
+build/
+
+# Base de datos local
+*.db
+*.sqlite
+
+# Logs
+*.log
+logs/
+
+# IDE / SO
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

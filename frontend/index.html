@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PrestaPro · Gestión de Préstamos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-logo">₲</div>
+          <div>
+            <div class="brand-name">PrestaPro</div>
+            <div class="brand-sub">Gestión de préstamos</div>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <a href="#/dashboard" data-nav="dashboard" class="nav-item">
+            <span class="nav-ico">▣</span> Panel
+          </a>
+          <a href="#/loans" data-nav="loans" class="nav-item">
+            <span class="nav-ico">◈</span> Préstamos
+          </a>
+          <a href="#/companies" data-nav="companies" class="nav-item">
+            <span class="nav-ico">⬢</span> Empresas
+          </a>
+          <a href="#/reports" data-nav="reports" class="nav-item">
+            <span class="nav-ico">◉</span> Reportes
+          </a>
+        </nav>
+
+        <div class="sidebar-foot">
+          <div class="svc-dot" id="svc-rust"></div>
+          <span class="svc-name">API Rust</span>
+          <div class="svc-dot" id="svc-py"></div>
+          <span class="svc-name">API Python</span>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <h1 id="page-title">Panel</h1>
+          <span id="clock" class="clock"></span>
+        </header>
+        <div id="view" class="view"></div>
+      </main>
+    </div>
+
+    <div id="toast-root"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

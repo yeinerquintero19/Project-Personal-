@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: prestapro-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: prestapro
+      POSTGRES_PASSWORD: prestapro_secret
+      POSTGRES_DB: prestapro
+    ports:
+      - "5432:5432"
+    volumes:
+      - prestapro_pgdata:/var/lib/postgresql/data
+      - ./scripts/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prestapro -d prestapro"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  prestapro_pgdata:
