@@ -3,23 +3,38 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MerPrest Â· Demo sin servidor</title>
+<title>MerPrest · Demo sin servidor</title>
 <style>
 :root{--bg:#0a0e1a;--bg-soft:#0f1526;--panel:rgba(255,255,255,.04);--panel-solid:#121a2e;--border:rgba(255,255,255,.08);--text:#e8edf7;--dim:#8b96ad;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--radius:14px;--font:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",monospace}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:var(--font);color:var(--text);background:radial-gradient(1100px 500px at 85% -10%,rgba(34,197,94,.08),transparent),radial-gradient(900px 500px at -10% 110%,rgba(59,130,246,.08),transparent),var(--bg);font-size:14px;min-height:100vh}
 #app{display:flex;min-height:100vh}
-.sidebar{width:240px;flex-shrink:0;background:rgba(10,14,26,.75);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
-.brand{display:flex;align-items:center;gap:12px;padding:0 8px 20px}
-.brand-logo{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;font-weight:800;background:linear-gradient(135deg,#22c55e,#0ea5e9);color:#fff;box-shadow:0 6px 18px rgba(34,197,94,.35)}
-.brand-name{font-weight:800;font-size:17px}
-.brand-sub{font-size:11px;color:var(--dim)}
-.nav{display:flex;flex-direction:column;gap:4px;flex:1}
-.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:var(--dim);text-decoration:none;font-weight:600;transition:.15s}
-.nav-item:hover{color:var(--text);background:var(--panel)}
-.nav-item.active{color:var(--green);background:rgba(34,197,94,.14)}
-.nav-ico{width:20px;text-align:center}
-.sidebar-foot{padding:14px 8px 0;border-top:1px solid var(--border);font-size:11px;color:var(--dim);line-height:1.7}
+.sidebar{width:250px;flex-shrink:0;background:linear-gradient(180deg,#0e1526 0%,#0a0e1a 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 16px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:12px;padding:4px 8px 20px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.brand-logo{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:22px;font-weight:800;background:linear-gradient(135deg,#22c55e,#0ea5e9);color:#fff;box-shadow:0 8px 22px rgba(34,197,94,.4)}
+.brand-name{font-weight:800;font-size:18px;letter-spacing:.3px}
+.brand-sub{font-size:11px;color:var(--dim);margin-top:2px}
+.nav-label{font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:var(--dim);padding:0 10px;margin-bottom:8px}
+.nav{display:flex;flex-direction:column;gap:6px;flex:1}
+.nav-item{position:relative;display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;color:var(--dim);text-decoration:none;font-weight:600;font-size:13.5px;transition:all .18s}
+.nav-item svg{width:19px;height:19px;flex-shrink:0;opacity:.85}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.05);transform:translateX(3px)}
+.nav-item.active{color:#fff;background:linear-gradient(135deg,rgba(34,197,94,.28),rgba(14,165,233,.12));box-shadow:inset 0 0 0 1px rgba(34,197,94,.4)}
+.nav-item.active svg{opacity:1}
+.nav-item.active::before{content:"";position:absolute;left:-16px;top:50%;transform:translateY(-50%);width:4px;height:26px;border-radius:0 4px 4px 0;background:var(--green);box-shadow:0 0 12px rgba(34,197,94,.7)}
+.sidebar-foot{padding:16px 8px 4px;border-top:1px solid var(--border);margin-top:12px;font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:10px;line-height:1.6}
+.sidebar-foot .reset-btn{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--dim);border-radius:10px;padding:8px 10px;font-family:var(--font);font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s;text-align:left}
+.sidebar-foot .reset-btn:hover{color:var(--red);border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.08)}
+@media(max-width:900px){
+  .sidebar{width:72px;padding:20px 10px}
+  .brand{justify-content:center;padding:4px 0 20px}
+  .brand-name,.brand-sub,.nav-label,.nav-text,.sidebar-foot span{display:none}
+  .nav-item{justify-content:center}
+  .nav-item.active::before{left:-10px}
+  .sidebar-foot{padding:12px 4px 4px;align-items:center}
+  .sidebar-foot .reset-btn{width:44px;height:44px;border-radius:12px;font-size:0;display:grid;place-items:center}
+  .sidebar-foot .reset-btn::after{content:"↺";font-size:16px}
+}
 .content{flex:1;padding:26px 34px 60px;min-width:0}
 .topbar{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:22px}
 .topbar h1{font-size:24px;font-weight:800}
@@ -92,14 +107,30 @@ body{font-family:var(--font);color:var(--text);background:radial-gradient(1100px
 <body>
 <div id="app">
   <aside class="sidebar">
-    <div class="brand"><div class="brand-logo">â‚²</div><div><div class="brand-name">MerPrest</div><div class="brand-sub">Demo sin servidor</div></div></div>
+    <div class="brand"><div class="brand-logo">₲</div><div><div class="brand-name">MerPrest</div><div class="brand-sub">Gestión de préstamos</div></div></div>
+    <div class="nav-label">Menú</div>
     <nav class="nav">
-      <a href="#/dashboard" data-nav="dashboard" class="nav-item"><span class="nav-ico">â–£</span> Panel</a>
-      <a href="#/loans" data-nav="loans" class="nav-item"><span class="nav-ico">â—ˆ</span> PrÃ©stamos</a>
-      <a href="#/companies" data-nav="companies" class="nav-item"><span class="nav-ico">â¬¢</span> Empresas</a>
-      <a href="#/reports" data-nav="reports" class="nav-item"><span class="nav-ico">â—‰</span> Reportes</a>
+      <a href="#/dashboard" data-nav="dashboard" class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span class="nav-text">Panel</span>
+      </a>
+      <a href="#/loans" data-nav="loans" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span class="nav-text">Préstamos</span>
+      </a>
+      <a href="#/companies" data-nav="companies" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></svg>
+        <span class="nav-text">Empresas</span>
+      </a>
+      <a href="#/reports" data-nav="reports" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15v-4"/><path d="M12 15V7"/><path d="M17 15v-6"/></svg>
+        <span class="nav-text">Reportes</span>
+      </a>
     </nav>
-    <div class="sidebar-foot">Modo demo Â· datos en tu navegador<br/><button class="btn btn-sm btn-ghost" onclick="resetData()">Reiniciar datos</button></div>
+    <div class="sidebar-foot">
+      <span>Modo demo · datos en tu navegador</span>
+      <button class="reset-btn" onclick="resetData()">↺ Reiniciar datos</button>
+    </div>
   </aside>
   <main class="content">
     <header class="topbar"><h1 id="page-title">Panel</h1><span class="clock" id="clock"></span></header>
@@ -115,7 +146,7 @@ const DB_KEY = "merprest_db";
 let db = load();
 function load(){ try{ return JSON.parse(localStorage.getItem(DB_KEY)) || seed(); }catch(e){ return seed(); } }
 function save(){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
-function resetData(){ if(confirm("Â¿Borrar todos los datos y volver a los de ejemplo?")){ localStorage.removeItem(DB_KEY); db = seed(); save(); location.hash = "#/dashboard"; navigate(); } }
+function resetData(){ if(confirm("¿Borrar todos los datos y volver a los de ejemplo?")){ localStorage.removeItem(DB_KEY); db = seed(); save(); location.hash = "#/dashboard"; navigate(); } }
 function uid(){ return (crypto.randomUUID ? crypto.randomUUID() : "id-" + Math.random().toString(36).slice(2) + Date.now()); }
 function today(){ return new Date().toISOString().slice(0,10); }
 function addMonths(d, m){ const dt = new Date(d + "T00:00:00"); dt.setMonth(dt.getMonth() + m); return dt.toISOString().slice(0,10); }
@@ -143,17 +174,16 @@ function seed(){
   const c2 = { id: uid(), name: "TechSoluciones EIRL", ruc: "20600067890", contact_email: "contabilidad@techsol.pe", contact_phone: "+51 1 555 0202", created_at: today() };
   const c3 = { id: uid(), name: "AgroInversiones Norte", ruc: "20450098765", contact_email: "cobranzas@agronorte.pe", contact_phone: "+51 73 555 0303", created_at: today() };
   const l1 = makeLoan(c1.id, 50000, 0.12, 12, addMonths(today(), -2));
-  l1.installments.forEach(i => { i.due_date < today() ? (i.paid_amount = i.total, savePaymentsForSeed(i)) : null; });
+  l1.installments.forEach(i => { if(i.due_date < today()){ i.paid_amount = i.total; savePaymentsForSeed(i); } });
   const l2 = makeLoan(c2.id, 12000, 0.18, 6, addMonths(today(), -1));
   const l3 = makeLoan(c3.id, 30000, 0.15, 24, addMonths(today(), -3));
-  l3.installments.forEach(i => { if(i.number <= 1){ i.paid_amount = i.total; savePaymentsForSeed(i);} });
+  l3.installments.forEach(i => { if(i.number <= 1){ i.paid_amount = i.total; savePaymentsForSeed(i); } });
   return { companies: [c1, c2, c3], loans: [l1, l2, l3] };
 }
 function savePaymentsForSeed(i){ i.payments = [{ id: uid(), amount: i.total, payment_date: i.due_date, method: "bank_transfer", reference: "Pago inicial" }]; }
 function makeLoan(company_id, amount, annualRate, months, start){
-  const installments = frenchSchedule(amount, annualRate, months, start).map(i => ({ ...i, loan_id: "" }));
-  const l = { id: uid(), company_id, amount, annual_rate: annualRate, term_months: months, start_date: start, currency: "USD", created_at: today(), installments: installments.map(i => ({ ...i, loan_id: uid() })) };
-  l.installments.forEach(i => i.loan_id = l.id);
+  const l = { id: uid(), company_id, amount, annual_rate: annualRate, term_months: months, start_date: start, currency: "USD", created_at: today(), installments: [] };
+  l.installments = frenchSchedule(amount, annualRate, months, start).map(i => ({ ...i, loan_id: l.id }));
   return l;
 }
 function companyOf(l){ return db.companies.find(c => c.id === l.company_id); }
@@ -177,14 +207,14 @@ function renderDashboard(v){
   const recent = [...db.loans].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5);
   v.innerHTML = `
   <div class="grid-cards">
-    <div class="card stat accent-green"><div class="stat-label">Capital desembolsado</div><div class="stat-value">${money(active.reduce((a,l)=>a+l.amount,0))}</div><div class="stat-foot">${active.length} prÃ©stamos activos</div></div>
-    <div class="card stat accent-blue"><div class="stat-label">Cobrado hasta hoy</div><div class="stat-value">${money(collected)}</div><div class="stat-foot">${paid} prÃ©stamos pagados</div></div>
+    <div class="card stat accent-green"><div class="stat-label">Capital desembolsado</div><div class="stat-value">${money(active.reduce((a,l)=>a+l.amount,0))}</div><div class="stat-foot">${active.length} préstamos activos</div></div>
+    <div class="card stat accent-blue"><div class="stat-label">Cobrado hasta hoy</div><div class="stat-value">${money(collected)}</div><div class="stat-foot">${paid} préstamos pagados</div></div>
     <div class="card stat accent-amber"><div class="stat-label">Por cobrar (cuotas)</div><div class="stat-value">${money(outstanding)}</div><div class="stat-foot">Saldo vivo del portafolio</div></div>
     <div class="card stat ${overdue.length ? "accent-red" : "accent-green"}"><div class="stat-label">Cuotas vencidas</div><div class="stat-value">${overdue.length}</div><div class="stat-foot">${money(overdueAmt)} en riesgo</div></div>
   </div>
-  <div class="card"><div class="card-head"><h2>PrÃ©stamos recientes</h2><a class="btn btn-ghost" href="#/loans">Ver todos â†’</a></div>
+  <div class="card"><div class="card-head"><h2>Préstamos recientes</h2><a class="btn btn-ghost" href="#/loans">Ver todos →</a></div>
     <div class="table-wrap"><table class="table"><thead><tr><th>Empresa</th><th>Monto</th><th>Tasa anual</th><th>Plazo</th><th>Inicio</th><th>Estado</th><th></th></tr></thead><tbody>
-    ${recent.map(l => `<tr><td><strong>${companyOf(l).name}</strong></td><td>${money(l.amount, l.currency)}</td><td>${pct(l.annual_rate)}</td><td>${l.term_months} meses</td><td>${fmtDate(l.start_date)}</td><td>${badge(loanStatus(l))}</td><td><a class="link" href="#/loans/${l.id}">Ver â†’</a></td></tr>`).join("") || `<tr><td colspan="7" class="td-empty">Sin prÃ©stamos</td></tr>`}
+    ${recent.map(l => `<tr><td><strong>${companyOf(l).name}</strong></td><td>${money(l.amount, l.currency)}</td><td>${pct(l.annual_rate)}</td><td>${l.term_months} meses</td><td>${fmtDate(l.start_date)}</td><td>${badge(loanStatus(l))}</td><td><a class="link" href="#/loans/${l.id}">Ver →</a></td></tr>`).join("") || `<tr><td colspan="7" class="td-empty">Sin préstamos</td></tr>`}
     </tbody></table></div></div>`;
 }
 
@@ -192,27 +222,27 @@ function renderLoans(v){
   const filter = (v.dataset.status || "");
   const loans = db.loans.filter(l => !filter || loanStatus(l) === filter).sort((a, b) => b.created_at.localeCompare(a.created_at));
   v.innerHTML = `
-  <div class="card"><div class="card-head"><h2>PrÃ©stamos</h2><div style="display:flex;gap:10px">
+  <div class="card"><div class="card-head"><h2>Préstamos</h2><div style="display:flex;gap:10px">
     <select class="select" id="f-status">
       <option value="">Todos</option><option value="active" ${filter==="active"?"selected":""}>Activos</option>
       <option value="late" ${filter==="late"?"selected":""}>Vencidos</option><option value="paid" ${filter==="paid"?"selected":""}>Pagados</option>
     </select>
-    <button class="btn btn-primary" id="btn-new">+ Nuevo prÃ©stamo</button></div></div>
+    <button class="btn btn-primary" id="btn-new">+ Nuevo préstamo</button></div></div>
     <div class="table-wrap"><table class="table"><thead><tr><th>Empresa</th><th>Monto</th><th>Tasa anual</th><th>Plazo</th><th>Inicio</th><th>Estado</th><th></th></tr></thead><tbody>
-    ${loans.map(l => `<tr><td><strong>${companyOf(l).name}</strong></td><td>${money(l.amount, l.currency)}</td><td>${pct(l.annual_rate)}</td><td>${l.term_months} meses</td><td>${fmtDate(l.start_date)}</td><td>${badge(loanStatus(l))}</td><td><a class="link" href="#/loans/${l.id}">Ver â†’</a></td></tr>`).join("") || `<tr><td colspan="7" class="td-empty">Sin prÃ©stamos</td></tr>`}
+    ${loans.map(l => `<tr><td><strong>${companyOf(l).name}</strong></td><td>${money(l.amount, l.currency)}</td><td>${pct(l.annual_rate)}</td><td>${l.term_months} meses</td><td>${fmtDate(l.start_date)}</td><td>${badge(loanStatus(l))}</td><td><a class="link" href="#/loans/${l.id}">Ver →</a></td></tr>`).join("") || `<tr><td colspan="7" class="td-empty">Sin préstamos</td></tr>`}
     </tbody></table></div></div>`;
   v.querySelector("#f-status").addEventListener("change", e => { v.dataset.status = e.target.value; renderLoans(v); });
   v.querySelector("#btn-new").addEventListener("click", () => {
     if(!db.companies.length){ toast("Primero registra una empresa", "err"); return; }
     const d = openModal(`<form method="dialog" class="modal-body" id="lf">
-      <h3>Nuevo prÃ©stamo</h3>
+      <h3>Nuevo préstamo</h3>
       <label>Empresa<select name="company_id">${db.companies.map(c => `<option value="${c.id}">${c.name}</option>`).join("")}</select></label>
       <div class="form-row"><label>Monto (US$)<input name="amount" type="number" min="1" step="0.01" required value="10000"></label>
       <label>Tasa anual (%)<input name="rate" type="number" min="0.1" max="100" step="0.01" required value="12"></label></div>
       <div class="form-row"><label>Plazo (meses)<input name="months" type="number" min="1" max="360" required value="12"></label>
       <label>Desembolso<input name="start" type="date" required value="${today()}"></label></div>
-      <div class="preview"><div class="preview-row"><span>Cuota mensual estimada</span><strong id="pv1">â€”</strong></div>
-      <div class="preview-row"><span>InterÃ©s total estimado</span><strong id="pv2">â€”</strong></div></div>
+      <div class="preview"><div class="preview-row"><span>Cuota mensual estimada</span><strong id="pv1">—</strong></div>
+      <div class="preview-row"><span>Interés total estimado</span><strong id="pv2">—</strong></div></div>
       <div class="modal-actions"><button type="button" class="btn btn-ghost" data-cancel>Cancelar</button><button type="submit" class="btn btn-primary">Crear</button></div>
     </form>`);
     const f = d.querySelector("form");
@@ -222,44 +252,44 @@ function renderLoans(v){
     d.querySelector("[data-cancel]").addEventListener("click", () => d.close());
     f.addEventListener("submit", e => { e.preventDefault();
       const l = makeLoan(f.company_id.value, +f.amount.value, +f.rate.value/100, +f.months.value, f.start.value);
-      db.loans.push(l); save(); d.close(); toast("PrÃ©stamo creado con sus cuotas"); renderLoans(v); });
+      db.loans.push(l); save(); d.close(); toast("Préstamo creado con sus cuotas"); renderLoans(v); });
   });
 }
 
 function renderLoanDetail(v, id){
   const l = db.loans.find(x => x.id === id);
-  if(!l){ v.innerHTML = `<div class="card"><p>PrÃ©stamo no encontrado</p></div>`; return; }
+  if(!l){ v.innerHTML = `<div class="card"><p>Préstamo no encontrado</p></div>`; return; }
   const c = companyOf(l);
   const next = l.installments.find(i => effStatus(i) !== "paid");
   const paidCount = l.installments.filter(i => effStatus(i) === "paid").length;
   v.innerHTML = `
-  <a class="link" href="#/loans">â† Volver a prÃ©stamos</a>
+  <a class="link" href="#/loans">← Volver a préstamos</a>
   <div class="grid-cards" style="margin-top:14px">
     <div class="card stat accent-green"><div class="stat-label">Monto</div><div class="stat-value">${money(l.amount, l.currency)}</div><div class="stat-foot">${c.name}</div></div>
     <div class="card stat accent-blue"><div class="stat-label">Cuotas</div><div class="stat-value">${paidCount} / ${l.installments.length}</div><div class="stat-foot">${pct(l.annual_rate)} tasa anual</div></div>
-    <div class="card stat accent-amber"><div class="stat-label">Estado</div><div class="stat-value">${badge(loanStatus(l))}</div><div class="stat-foot">IniciÃ³ ${fmtDate(l.start_date)}</div></div>
-    <div class="card stat accent-green"><div class="stat-label">Siguiente cuota</div><div class="stat-value">${next ? fmtDate(next.due_date) : "â€”"}</div><div class="stat-foot">${next ? money(next.total - next.paid_amount, l.currency) : "PrÃ©stamo al dÃ­a"}</div></div>
+    <div class="card stat accent-amber"><div class="stat-label">Estado</div><div class="stat-value">${badge(loanStatus(l))}</div><div class="stat-foot">Inició ${fmtDate(l.start_date)}</div></div>
+    <div class="card stat accent-green"><div class="stat-label">Siguiente cuota</div><div class="stat-value">${next ? fmtDate(next.due_date) : "—"}</div><div class="stat-foot">${next ? money(next.total - next.paid_amount, l.currency) : "Préstamo al día"}</div></div>
   </div>
   <div class="card"><div class="card-head"><h2>Cuotas</h2>${next ? `<button class="btn btn-primary" id="btn-pay">+ Registrar pago</button>` : ""}</div>
-    <div class="table-wrap"><table class="table"><thead><tr><th>NÂ°</th><th>Vence</th><th>Capital</th><th>InterÃ©s</th><th>Total</th><th>Pagado</th><th>Saldo</th><th>Estado</th></tr></thead><tbody>
+    <div class="table-wrap"><table class="table"><thead><tr><th>N°</th><th>Vence</th><th>Capital</th><th>Interés</th><th>Total</th><th>Pagado</th><th>Saldo</th><th>Estado</th></tr></thead><tbody>
     ${l.installments.map(i => { const s = effStatus(i); const rem = Math.max(i.total - i.paid_amount, 0);
       return `<tr class="${s==="late"?"row-late":""}"><td>${i.number}</td><td>${fmtDate(i.due_date)}</td><td>${money(i.principal, l.currency)}</td><td>${money(i.interest, l.currency)}</td><td><strong>${money(i.total, l.currency)}</strong></td><td>${money(i.paid_amount, l.currency)}</td><td>${money(rem, l.currency)}</td><td>${badge(s)}</td></tr>`; }).join("")}
     </tbody></table></div></div>
   <div class="card"><div class="card-head"><h2>Historial de pagos</h2></div>
-    <div class="table-wrap"><table class="table"><thead><tr><th>Fecha</th><th>Cuota</th><th>Monto</th><th>MÃ©todo</th><th>Referencia</th></tr></thead><tbody>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Fecha</th><th>Cuota</th><th>Monto</th><th>Método</th><th>Referencia</th></tr></thead><tbody>
     ${l.installments.flatMap(i => i.payments.map(p => ({ ...p, num: i.number }))).sort((a,b)=>b.payment_date.localeCompare(a.payment_date)).map(p =>
-      `<tr><td>${fmtDate(p.payment_date)}</td><td>#${p.num}</td><td><strong>${money(p.amount, l.currency)}</strong></td><td>${p.method}</td><td>${p.reference || "â€”"}</td></tr>`).join("") || `<tr><td colspan="5" class="td-empty">Sin pagos registrados</td></tr>`}
+      `<tr><td>${fmtDate(p.payment_date)}</td><td>#${p.num}</td><td><strong>${money(p.amount, l.currency)}</strong></td><td>${p.method}</td><td>${p.reference || "—"}</td></tr>`).join("") || `<tr><td colspan="5" class="td-empty">Sin pagos registrados</td></tr>`}
     </tbody></table></div></div>`;
   const pay = v.querySelector("#btn-pay");
   if(pay) pay.addEventListener("click", () => {
     const d = openModal(`<form method="dialog" class="modal-body">
       <h3>Registrar pago</h3>
       <label>Cuota a pagar<select name="inst">
-        ${l.installments.filter(i => effStatus(i) !== "paid").map(i => `<option value="${i.id}">#${i.number} Â· ${fmtDate(i.due_date)} (${money(Math.max(i.total - i.paid_amount,0), l.currency)})</option>`).join("")}
+        ${l.installments.filter(i => effStatus(i) !== "paid").map(i => `<option value="${i.id}">#${i.number} · ${fmtDate(i.due_date)} (${money(Math.max(i.total - i.paid_amount,0), l.currency)})</option>`).join("")}
       </select></label>
       <div class="form-row"><label>Monto<input name="amount" type="number" step="0.01" min="0.01" required></label>
       <label>Fecha<input name="date" type="date" required value="${today()}"></label></div>
-      <label>MÃ©todo<select name="method"><option>bank_transfer</option><option>cash</option><option>check</option><option>card</option><option>other</option></select></label>
+      <label>Método<select name="method"><option>bank_transfer</option><option>cash</option><option>check</option><option>card</option><option>other</option></select></label>
       <label>Referencia<input name="reference"></label>
       <div class="modal-actions"><button type="button" class="btn btn-ghost" data-cancel>Cancelar</button><button type="submit" class="btn btn-primary">Pagar</button></div>
     </form>`);
@@ -281,8 +311,8 @@ function renderLoanDetail(v, id){
 
 function renderCompanies(v){
   v.innerHTML = `<div class="card"><div class="card-head"><h2>Empresas clientes</h2><button class="btn btn-primary" id="btn-new">+ Nueva empresa</button></div>
-    <div class="table-wrap"><table class="table"><thead><tr><th>Empresa</th><th>RUC</th><th>Contacto</th><th>TelÃ©fono</th><th></th></tr></thead><tbody>
-    ${db.companies.map(c => `<tr><td><strong>${c.name}</strong></td><td class="mono">${c.ruc}</td><td>${c.contact_email || "â€”"}</td><td>${c.contact_phone || "â€”"}</td>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Empresa</th><th>RUC</th><th>Contacto</th><th>Teléfono</th><th></th></tr></thead><tbody>
+    ${db.companies.map(c => `<tr><td><strong>${c.name}</strong></td><td class="mono">${c.ruc}</td><td>${c.contact_email || "—"}</td><td>${c.contact_phone || "—"}</td>
       <td><button class="btn btn-sm btn-ghost" data-edit="${c.id}">Editar</button> <button class="btn btn-sm btn-danger" data-del="${c.id}">Eliminar</button></td></tr>`).join("") || `<tr><td colspan="5" class="td-empty">Sin empresas</td></tr>`}
     </tbody></table></div></div>`;
   v.querySelector("#btn-new").addEventListener("click", () => form(null, v));
@@ -290,7 +320,7 @@ function renderCompanies(v){
   v.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
     const c = db.companies.find(x => x.id === b.dataset.del);
     const n = db.loans.filter(l => l.company_id === c.id).length;
-    if(confirm(`Â¿Eliminar a "${c.name}"? TambiÃ©n se borrarÃ¡n ${n} prÃ©stamo(s).`)){
+    if(confirm(`¿Eliminar a "${c.name}"? También se borrarán ${n} préstamo(s).`)){
       db.companies = db.companies.filter(x => x.id !== c.id);
       db.loans = db.loans.filter(l => l.company_id !== c.id);
       save(); toast("Empresa eliminada"); renderCompanies(v); }
@@ -301,7 +331,7 @@ function renderCompanies(v){
       <label>Nombre<input name="name" required maxlength="150" value="${c ? c.name : ""}"></label>
       <label>RUC<input name="ruc" required maxlength="20" value="${c ? c.ruc : ""}"></label>
       <label>Correo<input name="email" type="email" value="${c ? c.contact_email || "" : ""}"></label>
-      <label>TelÃ©fono<input name="phone" maxlength="30" value="${c ? c.contact_phone || "" : ""}"></label>
+      <label>Teléfono<input name="phone" maxlength="30" value="${c ? c.contact_phone || "" : ""}"></label>
       <div class="modal-actions"><button type="button" class="btn btn-ghost" data-cancel>Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div>
     </form>`);
     d.querySelector("[data-cancel]").addEventListener("click", () => d.close());
@@ -331,15 +361,15 @@ function renderReports(v){
   const recovery = loaned + collected ? (collected / (loaned + collected) * 100) : 0;
   v.innerHTML = `
   <div class="grid-cards">
-    <div class="card stat accent-green"><div class="stat-label">Capital total desembolsado</div><div class="stat-value">${money(loaned)}</div><div class="stat-foot">Tasa de recuperaciÃ³n ${recovery.toFixed(1)}%</div></div>
-    <div class="card stat accent-blue"><div class="stat-label">Recuperado</div><div class="stat-value">${money(collected)}</div><div class="stat-foot">InterÃ©s esperado ${money(expectedInterest)}</div></div>
+    <div class="card stat accent-green"><div class="stat-label">Capital total desembolsado</div><div class="stat-value">${money(loaned)}</div><div class="stat-foot">Tasa de recuperación ${recovery.toFixed(1)}%</div></div>
+    <div class="card stat accent-blue"><div class="stat-label">Recuperado</div><div class="stat-value">${money(collected)}</div><div class="stat-foot">Interés esperado ${money(expectedInterest)}</div></div>
     <div class="card stat accent-amber"><div class="stat-label">Cartera vencida</div><div class="stat-value">${money(overdueAmt)}</div><div class="stat-foot">${late} cuotas vencidas</div></div>
-    <div class="card stat accent-blue"><div class="stat-label">Salud de cuotas</div><div class="stat-value">${paid}/${all.length}</div><div class="stat-foot">${paidPct.toFixed(1)}% pagadas Â· ${latePct.toFixed(1)}% vencidas</div></div>
+    <div class="card stat accent-blue"><div class="stat-label">Salud de cuotas</div><div class="stat-value">${paid}/${all.length}</div><div class="stat-foot">${paidPct.toFixed(1)}% pagadas · ${latePct.toFixed(1)}% vencidas</div></div>
   </div>
   <div class="card"><div class="card-head"><h2>Morosidad</h2></div>
-    <div class="table-wrap"><table class="table"><thead><tr><th>Empresa</th><th>Cuota</th><th>Vencimiento</th><th>DÃ­as de atraso</th><th>Por cobrar</th></tr></thead><tbody>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Empresa</th><th>Cuota</th><th>Vencimiento</th><th>Días de atraso</th><th>Por cobrar</th></tr></thead><tbody>
     ${db.loans.flatMap(l => l.installments.filter(i => effStatus(i) === "late").map(i => ({ ...i, company: companyOf(l).name, currency: l.currency }))).sort((a,b) => a.due_date.localeCompare(b.due_date)).map(i =>
-      `<tr><td><strong>${i.company}</strong></td><td>#${i.number}</td><td>${fmtDate(i.due_date)}</td><td class="danger">${daysBetween(i.due_date, today())} dÃ­as</td><td>${money(i.total - i.paid_amount, i.currency)}</td></tr>`).join("") || `<tr><td colspan="5" class="td-empty">Â¡Sin cuotas vencidas!</td></tr>`}
+      `<tr><td><strong>${i.company}</strong></td><td>#${i.number}</td><td>${fmtDate(i.due_date)}</td><td class="danger">${daysBetween(i.due_date, today())} días</td><td>${money(i.total - i.paid_amount, i.currency)}</td></tr>`).join("") || `<tr><td colspan="5" class="td-empty">¡Sin cuotas vencidas!</td></tr>`}
     </tbody></table></div></div>
   <div class="grid-2">
     <div class="card"><div class="card-head"><h2>Salud del portafolio</h2></div>
@@ -348,15 +378,15 @@ function renderReports(v){
         <div class="bar-row"><span>Por vencer</span><div class="bar-track"><div class="bar-fill blue" style="width:${Math.max(100 - paidPct - latePct, 0)}%"></div></div><span>${upcoming}</span></div>
         <div class="bar-row"><span>Vencidas</span><div class="bar-track"><div class="bar-fill red" style="width:${latePct}%"></div></div><span>${late} (${latePct.toFixed(1)}%)</span></div>
       </div>
-      <h3 class="subtitle">ConcentraciÃ³n por empresa</h3>
+      <h3 class="subtitle">Concentración por empresa</h3>
       <div class="table-wrap"><table class="table"><thead><tr><th>Empresa</th><th>Por cobrar</th><th>% del total</th><th>Rating</th></tr></thead><tbody>
       ${byCompany.map(x => { const share = totalOut ? x.out / totalOut * 100 : 0; const rt = share >= 50 ? "ALTO" : share >= 25 ? "MEDIO" : "BAJO";
         return `<tr><td><strong>${x.name}</strong></td><td>${money(x.out)}</td><td>${share.toFixed(1)}%</td><td><span class="badge ${rt==="ALTO"?"badge-late":rt==="MEDIO"?"badge-active":"badge-paid"}">${rt}</span></td></tr>`; }).join("")}
       </tbody></table></div>
     </div>
-    <div class="card"><div class="card-head"><h2>Simulador de amortizaciÃ³n</h2></div>
+    <div class="card"><div class="card-head"><h2>Simulador de amortización</h2></div>
       <div class="sim-form"><div class="form-row">
-        <label>Monto<input id="s-amount" type="number" min="1" value="50000"></label>
+        <label>Monto (US$)<input id="s-amount" type="number" min="1" value="50000"></label>
         <label>Tasa anual (%)<input id="s-rate" type="number" min="0.1" value="12"></label></div>
         <div class="form-row"><label>Plazo (meses)<input id="s-months" type="number" min="1" max="360" value="12"></label>
         <button class="btn btn-primary" id="s-run" style="margin-top:22px">Calcular</button></div></div>
@@ -372,9 +402,9 @@ function renderReports(v){
       <div class="preview">
         <div class="preview-row"><span>Cuota mensual</span><strong>${money(s[0].total)}</strong></div>
         <div class="preview-row"><span>Total a pagar</span><strong>${money(total)}</strong></div>
-        <div class="preview-row"><span>InterÃ©s total</span><strong>${money(total - a)}</strong></div>
+        <div class="preview-row"><span>Interés total</span><strong>${money(total - a)}</strong></div>
       </div>
-      <div class="table-wrap sim-table" style="margin-top:12px"><table class="table"><thead><tr><th>NÂ°</th><th>Vence</th><th>Cuota</th><th>Capital</th><th>InterÃ©s</th><th>Saldo</th></tr></thead><tbody>
+      <div class="table-wrap sim-table" style="margin-top:12px"><table class="table"><thead><tr><th>N°</th><th>Vence</th><th>Cuota</th><th>Capital</th><th>Interés</th><th>Saldo</th></tr></thead><tbody>
       ${s.map(x => `<tr><td>${x.number}</td><td>${fmtDate(x.due_date)}</td><td>${money(x.total)}</td><td>${money(x.principal)}</td><td>${money(x.interest)}</td><td>${money(x.balance)}</td></tr>`).join("")}
       </tbody></table></div>`;
   };
@@ -382,7 +412,7 @@ function renderReports(v){
 }
 
 /* ============ Router ============ */
-const titles = { dashboard: "Panel", loans: "PrÃ©stamos", companies: "Empresas", reports: "Reportes" };
+const titles = { dashboard: "Panel", loans: "Préstamos", companies: "Empresas", reports: "Reportes" };
 function navigate(){
   const hash = (location.hash.replace(/^#\/?/, "") || "dashboard");
   const [route, param] = hash.split("/");
