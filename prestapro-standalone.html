@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PrestaPro · Demo sin servidor</title>
+<style>
+:root{--bg:#0a0e1a;--bg-soft:#0f1526;--panel:rgba(255,255,255,.04);--panel-solid:#121a2e;--border:rgba(255,255,255,.08);--text:#e8edf7;--dim:#8b96ad;--green:#22c55e;--blue:#3b82f6;--amber:#f59e0b;--red:#ef4444;--radius:14px;--font:"Inter",system-ui,sans-serif;--mono:"JetBrains Mono",monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font);color:var(--text);background:radial-gradient(1100px 500px at 85% -10%,rgba(34,197,94,.08),transparent),radial-gradient(900px 500px at -10% 110%,rgba(59,130,246,.08),transparent),var(--bg);font-size:14px;min-height:100vh}
+#app{display:flex;min-height:100vh}
+.sidebar{width:240px;flex-shrink:0;background:rgba(10,14,26,.75);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:22px 14px;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:12px;padding:0 8px 20px}
+.brand-logo{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;font-weight:800;background:linear-gradient(135deg,#22c55e,#0ea5e9);color:#fff;box-shadow:0 6px 18px rgba(34,197,94,.35)}
+.brand-name{font-weight:800;font-size:17px}
+.brand-sub{font-size:11px;color:var(--dim)}
+.nav{display:flex;flex-direction:column;gap:4px;flex:1}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:var(--dim);text-decoration:none;font-weight:600;transition:.15s}
+.nav-item:hover{color:var(--text);background:var(--panel)}
+.nav-item.active{color:var(--green);background:rgba(34,197,94,.14)}
+.nav-ico{width:20px;text-align:center}
+.sidebar-foot{padding:14px 8px 0;border-top:1px solid var(--border);font-size:11px;color:var(--dim);line-height:1.7}
+.content{flex:1;padding:26px 34px 60px;min-width:0}
+.topbar{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:22px}
+.topbar h1{font-size:24px;font-weight:800}
+.clock{color:var(--dim);font-size:13px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:18px}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;flex-wrap:wrap}
+.card-head h2{font-size:16px;font-weight:700}
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:18px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:1100px){.grid-2{grid-template-columns:1fr}}
+.stat{position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;inset:0 0 auto 0;height:3px}
+.accent-green::before{background:var(--green)}.accent-blue::before{background:var(--blue)}.accent-amber::before{background:var(--amber)}.accent-red::before{background:var(--red)}
+.stat-label{font-size:12px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.stat-value{font-size:25px;font-weight:800;margin:8px 0 6px;font-family:var(--mono)}
+.stat-foot{font-size:12px;color:var(--dim)}
+.table-wrap{overflow-x:auto}
+.table{width:100%;border-collapse:collapse}
+.table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim);padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+.table td{padding:11px 10px;border-bottom:1px solid rgba(255,255,255,.045);white-space:nowrap}
+.table tbody tr:hover{background:rgba(255,255,255,.03)}
+.row-late{background:rgba(239,68,68,.05)}
+.td-empty{text-align:center;color:var(--dim);padding:28px!important}
+.mono{font-family:var(--mono)}
+.danger{color:var(--red);font-weight:700}
+.link{color:var(--blue);text-decoration:none;font-weight:600}
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700}
+.badge-active{background:rgba(59,130,246,.15);color:#7ab3ff}
+.badge-paid{background:rgba(34,197,94,.14);color:var(--green)}
+.badge-late{background:rgba(239,68,68,.15);color:var(--red)}
+.badge-pending{background:rgba(245,158,11,.15);color:var(--amber)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:transparent;color:var(--text);padding:9px 16px;border-radius:10px;font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:.15s;text-decoration:none}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:linear-gradient(135deg,#22c55e,#16a34a);border-color:transparent;color:#fff;box-shadow:0 6px 16px rgba(34,197,94,.3)}
+.btn-ghost:hover{background:var(--panel)}
+.btn-danger{color:var(--red)}.btn-danger:hover{background:rgba(239,68,68,.12)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.select,.sim-form input,.sim-form select{background:var(--panel-solid);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-family:var(--font);font-size:13px;outline:none}
+.modal{background:var(--panel-solid);border:1px solid var(--border);border-radius:16px;color:var(--text);padding:0;width:min(480px,92vw);box-shadow:0 24px 60px rgba(0,0,0,.55)}
+.modal::backdrop{background:rgba(4,7,14,.7);backdrop-filter:blur(4px)}
+.modal-body{padding:24px;display:flex;flex-direction:column;gap:14px}
+.modal-body h3{font-size:18px;font-weight:800}
+.modal-body label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--dim)}
+.modal-body input,.modal-body select{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:10px 12px;font-family:var(--font);font-size:14px;outline:none}
+.modal-body input:focus{border-color:var(--green)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px}
+.preview{background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.25);border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:6px}
+.preview-row{display:flex;justify-content:space-between;font-size:13px;color:var(--dim)}
+.preview-row strong{color:var(--text);font-family:var(--mono)}
+.sim-table{max-height:340px;overflow-y:auto}
+.subtitle{font-size:14px;font-weight:700;margin:18px 0 10px}
+.bars{display:flex;flex-direction:column;gap:12px}
+.bar-row{display:grid;grid-template-columns:90px 1fr 110px;align-items:center;gap:10px;font-size:12px;color:var(--dim)}
+.bar-track{height:10px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;border-radius:999px;transition:width .5s}
+.bar-fill.green{background:var(--green)}.bar-fill.blue{background:var(--blue)}.bar-fill.red{background:var(--red)}
+.loading{display:flex;flex-direction:column;align-items:center;gap:14px;padding:70px 0;color:var(--dim)}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#toast-root{position:fixed;bottom:24px;right:24px;z-index:100;display:flex;flex-direction:column;gap:10px}
+.toast{padding:12px 18px;border-radius:12px;font-weight:600;font-size:13px;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:slidein .25s}
+.toast-ok{background:linear-gradient(135deg,#16a34a,#22c55e)}
+.toast-err{background:linear-gradient(135deg,#dc2626,#ef4444)}
+@keyframes slidein{from{opacity:0;transform:translateY(10px)}to{opacity:1}}
+::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-thumb{background:#263049;border-radius:999px}
+.banner{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);border-radius:12px;padding:10px 16px;font-size:12px;margin-bottom:18px}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-logo">₲</div><div><div class="brand-name">PrestaPro</div><div class="brand-sub">Demo sin servidor</div></div></div>
+    <nav class="nav">
+      <a href="#/dashboard" data-nav="dashboard" class="nav-item"><span class="nav-ico">▣</span> Panel</a>
+      <a href="#/loans" data-nav="loans" class="nav-item"><span class="nav-ico">◈</span> Préstamos</a>
+      <a href="#/companies" data-nav="companies" class="nav-item"><span class="nav-ico">⬢</span> Empresas</a>
+      <a href="#/reports" data-nav="reports" class="nav-item"><span class="nav-ico">◉</span> Reportes</a>
+    </nav>
+    <div class="sidebar-foot">Modo demo · datos en tu navegador<br/><button class="btn btn-sm btn-ghost" onclick="resetData()">Reiniciar datos</button></div>
+  </aside>
+  <main class="content">
+    <header class="topbar"><h1 id="page-title">Panel</h1><span class="clock" id="clock"></span></header>
+    <div id="view"></div>
+  </main>
+</div>
+<div id="toast-root"></div>
+
+<script>
+"use strict";
+/* ============ Minibase (localStorage) ============ */
+const DB_KEY = "prestapro_db";
+let db = load();
+function load(){ try{ return JSON.parse(localStorage.getItem(DB_KEY)) || seed(); }catch(e){ return seed(); } }
+function save(){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+function resetData(){ if(confirm("¿Borrar todos los datos y volver a los de ejemplo?")){ localStorage.removeItem(DB_KEY); db = seed(); save(); location.hash = "#/dashboard"; navigate(); } }
+function uid(){ return (crypto.randomUUID ? crypto.randomUUID() : "id-" + Math.random().toString(36).slice(2) + Date.now()); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function addMonths(d, m){ const dt = new Date(d + "T00:00:00"); dt.setMonth(dt.getMonth() + m); return dt.toISOString().slice(0,10); }
+function daysBetween(a, b){ return Math.round((new Date(b+"T00:00:00") - new Date(a+"T00:00:00")) / 86400000); }
+function frenchSchedule(amount, annualRate, months, start){
+  const r = annualRate / 12, n = months;
+  const payment = r <= 0 ? amount / n : amount * r / (1 - Math.pow(1 + r, -n));
+  let balance = amount; const out = [];
+  for(let i = 1; i <= months; i++){
+    const interest = balance * r;
+    const principal = (i === months) ? balance : payment - interest;
+    balance = Math.max(balance - principal, 0);
+    out.push({ id: uid(), loan_id: null, number: i, due_date: addMonths(start, i),
+      principal: r2(principal), interest: r2(interest), total: r2(principal + interest),
+      balance: r2(balance), paid_amount: 0, payments: [] });
+  }
+  return out;
+}
+function r2(v){ return Math.round(v * 100) / 100; }
+function effStatus(i){ return i.paid_amount >= i.total - 0.005 ? "paid" : (i.due_date < today() ? "late" : "pending"); }
+function loanStatus(l){ if(l.installments.every(i => effStatus(i) === "paid")) return "paid";
+  return l.installments.some(i => effStatus(i) === "late") ? "late" : "active"; }
+function seed(){
+  const c1 = { id: uid(), name: "Empresa Andina SAC", ruc: "20100012345", contact_email: "finanzas@andina.pe", contact_phone: "+51 1 555 0101", created_at: today() };
+  const c2 = { id: uid(), name: "TechSoluciones EIRL", ruc: "20600067890", contact_email: "contabilidad@techsol.pe", contact_phone: "+51 1 555 0202", created_at: today() };
+  const c3 = { id: uid(), name: "AgroInversiones Norte", ruc: "20450098765", contact_email: "cobranzas@agronorte.pe", contact_phone: "+51 73 555 0303", created_at: today() };
+  const l1 = makeLoan(c1.id, 50000, 0.12, 12, addMonths(today(), -2));
+  l1.installments.forEach(i => { i.due_date < today() ? (i.paid_amount = i.total, savePaymentsForSeed(i)) : null; });
+  const l2 = makeLoan(c2.id, 12000, 0.18, 6, addMonths(today(), -1));
+  const l3 = makeLoan(c3.id, 30000, 0.15, 24, addMonths(today(), -3));
+  l3.installments.forEach(i => { if(i.number <= 1){ i.paid_amount = i.total; savePaymentsForSeed(i);} });
+  return { companies: [c1, c2, c3], loans: [l1, l2, l3] };
+}
+function savePaymentsForSeed(i){ i.payments = [{ id: uid(), amount: i.total, payment_date: i.due_date, method: "bank_transfer", reference: "Pago inicial" }]; }
+function makeLoan(company_id, amount, annualRate, months, start){
+  const installments = frenchSchedule(amount, annualRate, months, start).map(i => ({ ...i, loan_id: "" }));
+  const l = { id: uid(), company_id, amount, annual_rate: annualRate, term_months: months, start_date: start, currency: "PEN", created_at: today(), installments: installments.map(i => ({ ...i, loan_id: uid() })) };
+  l.installments.forEach(i => i.loan_id = l.id);
+  return l;
+}
+function companyOf(l){ return db.companies.find(c => c.id === l.company_id); }
+
+/* ============ Formato / UI ============ */
+const money = (v, cur="PEN") => (cur === "USD" ? "US$ " : "S/ ") + Number(v).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const pct = v => (Number(v) * 100).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "%";
+const fmtDate = s => { const [y,m,d] = String(s).slice(0,10).split("-"); return d + "/" + m + "/" + y; };
+function badge(s){ const l = { active:"Activo", paid:"Pagado", late:"Vencido", pending:"Pendiente" }[s] || s; return `<span class="badge badge-${s}">${l}</span>`; }
+function toast(msg, type="ok"){ const r = document.getElementById("toast-root"); const el = document.createElement("div"); el.className = "toast toast-" + type; el.textContent = msg; r.appendChild(el); setTimeout(() => el.remove(), 3000); }
+function openModal(html){ const d = document.createElement("dialog"); d.className = "modal"; d.innerHTML = html; document.body.appendChild(d); d.showModal(); d.addEventListener("click", e => { if(e.target === d) d.close(); }); return d; }
+
+/* ============ Vistas ============ */
+function renderDashboard(v){
+  const active = db.loans.filter(l => loanStatus(l) === "active" || loanStatus(l) === "late");
+  const collected = db.loans.flatMap(l => l.installments).reduce((a, i) => a + i.paid_amount, 0);
+  const outstanding = db.loans.flatMap(l => l.installments).filter(i => effStatus(i) !== "paid").reduce((a, i) => a + (i.total - i.paid_amount), 0);
+  const overdue = db.loans.flatMap(l => l.installments).filter(i => effStatus(i) === "late");
+  const overdueAmt = overdue.reduce((a, i) => a + (i.total - i.paid_amount), 0);
+  const paid = db.loans.filter(l => loanStatus(l) === "paid").length;
+  const recent = [...db.loans].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5);
+  v.innerHTML = `
+  <div class="grid-cards">
+    <div class="card stat accent-green"><div class="stat-label">Capital desembolsado</div><div class="stat-value">${money(active.reduce((a,l)=>a+l.amount,0))}</div><div class="stat-foot">${active.length} préstamos activos</div></div>
+    <div class="card stat accent-blue"><div class="stat-label">Cobrado hasta hoy</div><div class="stat-value">${money(collected)}</div><div class="stat-foot">${paid} préstamos pagados</div></div>
+    <div class="card stat accent-amber"><div class="stat-label">Por cobrar (cuotas)</div><div class="stat-value">${money(outstanding)}</div><div class="stat-foot">Saldo vivo del portafolio</div></div>
+    <div class="card stat ${overdue.length ? "accent-red" : "accent-green"}"><div class="stat-label">Cuotas vencidas</div><div class="stat-value">${overdue.length}</div><div class="stat-foot">${money(overdueAmt)} en riesgo</div></div>
+  </div>
+  <div class="card"><div class="card-head"><h2>Préstamos recientes</h2><a class="btn btn-ghost" href="#/loans">Ver todos →</a></div>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Empresa</th><th>Monto</th><th>Tasa anual</th><th>Plazo</th><th>Inicio</th><th>Estado</th><th></th></tr></thead><tbody>
+    ${recent.map(l => `<tr><td><strong>${companyOf(l).name}</strong></td><td>${money(l.amount, l.currency)}</td><td>${pct(l.annual_rate)}</td><td>${l.term_months} meses</td><td>${fmtDate(l.start_date)}</td><td>${badge(loanStatus(l))}</td><td><a class="link" href="#/loans/${l.id}">Ver →</a></td></tr>`).join("") || `<tr><td colspan="7" class="td-empty">Sin préstamos</td></tr>`}
+    </tbody></table></div></div>`;
+}
+
+function renderLoans(v){
+  const filter = (v.dataset.status || "");
+  const loans = db.loans.filter(l => !filter || loanStatus(l) === filter).sort((a, b) => b.created_at.localeCompare(a.created_at));
+  v.innerHTML = `
+  <div class="card"><div class="card-head"><h2>Préstamos</h2><div style="display:flex;gap:10px">
+    <select class="select" id="f-status">
+      <option value="">Todos</option><option value="active" ${filter==="active"?"selected":""}>Activos</option>
+      <option value="late" ${filter==="late"?"selected":""}>Vencidos</option><option value="paid" ${filter==="paid"?"selected":""}>Pagados</option>
+    </select>
+    <button class="btn btn-primary" id="btn-new">+ Nuevo préstamo</button></div></div>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Empresa</th><th>Monto</th><th>Tasa anual</th><th>Plazo</th><th>Inicio</th><th>Estado</th><th></th></tr></thead><tbody>
+    ${loans.map(l => `<tr><td><strong>${companyOf(l).name}</strong></td><td>${money(l.amount, l.currency)}</td><td>${pct(l.annual_rate)}</td><td>${l.term_months} meses</td><td>${fmtDate(l.start_date)}</td><td>${badge(loanStatus(l))}</td><td><a class="link" href="#/loans/${l.id}">Ver →</a></td></tr>`).join("") || `<tr><td colspan="7" class="td-empty">Sin préstamos</td></tr>`}
+    </tbody></table></div></div>`;
+  v.querySelector("#f-status").addEventListener("change", e => { v.dataset.status = e.target.value; renderLoans(v); });
+  v.querySelector("#btn-new").addEventListener("click", () => {
+    if(!db.companies.length){ toast("Primero registra una empresa", "err"); return; }
+    const d = openModal(`<form method="dialog" class="modal-body" id="lf">
+      <h3>Nuevo préstamo</h3>
+      <label>Empresa<select name="company_id">${db.companies.map(c => `<option value="${c.id}">${c.name}</option>`).join("")}</select></label>
+      <div class="form-row"><label>Monto (PEN)<input name="amount" type="number" min="1" step="0.01" required value="10000"></label>
+      <label>Tasa anual (%)<input name="rate" type="number" min="0.1" max="100" step="0.01" required value="12"></label></div>
+      <div class="form-row"><label>Plazo (meses)<input name="months" type="number" min="1" max="360" required value="12"></label>
+      <label>Desembolso<input name="start" type="date" required value="${today()}"></label></div>
+      <div class="preview"><div class="preview-row"><span>Cuota mensual estimada</span><strong id="pv1">—</strong></div>
+      <div class="preview-row"><span>Interés total estimado</span><strong id="pv2">—</strong></div></div>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost" data-cancel>Cancelar</button><button type="submit" class="btn btn-primary">Crear</button></div>
+    </form>`);
+    const f = d.querySelector("form");
+    const pv = () => { const a=+f.amount.value, r=+f.rate.value/100, m=+f.months.value; if(!a||!r||!m) return;
+      const s = frenchSchedule(a, r, m, today()); d.querySelector("#pv1").textContent = money(s[0].total); d.querySelector("#pv2").textContent = money(s.reduce((x,i)=>x+i.interest,0)); };
+    ["amount","rate","months"].forEach(n => f[n].addEventListener("input", pv)); pv();
+    d.querySelector("[data-cancel]").addEventListener("click", () => d.close());
+    f.addEventListener("submit", e => { e.preventDefault();
+      const l = makeLoan(f.company_id.value, +f.amount.value, +f.rate.value/100, +f.months.value, f.start.value);
+      db.loans.push(l); save(); d.close(); toast("Préstamo creado con sus cuotas"); renderLoans(v); });
+  });
+}
+
+function renderLoanDetail(v, id){
+  const l = db.loans.find(x => x.id === id);
+  if(!l){ v.innerHTML = `<div class="card"><p>Préstamo no encontrado</p></div>`; return; }
+  const c = companyOf(l);
+  const next = l.installments.find(i => effStatus(i) !== "paid");
+  const paidCount = l.installments.filter(i => effStatus(i) === "paid").length;
+  v.innerHTML = `
+  <a class="link" href="#/loans">← Volver a préstamos</a>
+  <div class="grid-cards" style="margin-top:14px">
+    <div class="card stat accent-green"><div class="stat-label">Monto</div><div class="stat-value">${money(l.amount, l.currency)}</div><div class="stat-foot">${c.name}</div></div>
+    <div class="card stat accent-blue"><div class="stat-label">Cuotas</div><div class="stat-value">${paidCount} / ${l.installments.length}</div><div class="stat-foot">${pct(l.annual_rate)} tasa anual</div></div>
+    <div class="card stat accent-amber"><div class="stat-label">Estado</div><div class="stat-value">${badge(loanStatus(l))}</div><div class="stat-foot">Inició ${fmtDate(l.start_date)}</div></div>
+    <div class="card stat accent-green"><div class="stat-label">Siguiente cuota</div><div class="stat-value">${next ? fmtDate(next.due_date) : "—"}</div><div class="stat-foot">${next ? money(next.total - next.paid_amount, l.currency) : "Préstamo al día"}</div></div>
+  </div>
+  <div class="card"><div class="card-head"><h2>Cuotas</h2>${next ? `<button class="btn btn-primary" id="btn-pay">+ Registrar pago</button>` : ""}</div>
+    <div class="table-wrap"><table class="table"><thead><tr><th>N°</th><th>Vence</th><th>Capital</th><th>Interés</th><th>Total</th><th>Pagado</th><th>Saldo</th><th>Estado</th></tr></thead><tbody>
+    ${l.installments.map(i => { const s = effStatus(i); const rem = Math.max(i.total - i.paid_amount, 0);
+      return `<tr class="${s==="late"?"row-late":""}"><td>${i.number}</td><td>${fmtDate(i.due_date)}</td><td>${money(i.principal, l.currency)}</td><td>${money(i.interest, l.currency)}</td><td><strong>${money(i.total, l.currency)}</strong></td><td>${money(i.paid_amount, l.currency)}</td><td>${money(rem, l.currency)}</td><td>${badge(s)}</td></tr>`; }).join("")}
+    </tbody></table></div></div>
+  <div class="card"><div class="card-head"><h2>Historial de pagos</h2></div>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Fecha</th><th>Cuota</th><th>Monto</th><th>Método</th><th>Referencia</th></tr></thead><tbody>
+    ${l.installments.flatMap(i => i.payments.map(p => ({ ...p, num: i.number }))).sort((a,b)=>b.payment_date.localeCompare(a.payment_date)).map(p =>
+      `<tr><td>${fmtDate(p.payment_date)}</td><td>#${p.num}</td><td><strong>${money(p.amount, l.currency)}</strong></td><td>${p.method}</td><td>${p.reference || "—"}</td></tr>`).join("") || `<tr><td colspan="5" class="td-empty">Sin pagos registrados</td></tr>`}
+    </tbody></table></div></div>`;
+  const pay = v.querySelector("#btn-pay");
+  if(pay) pay.addEventListener("click", () => {
+    const d = openModal(`<form method="dialog" class="modal-body">
+      <h3>Registrar pago</h3>
+      <label>Cuota a pagar<select name="inst">
+        ${l.installments.filter(i => effStatus(i) !== "paid").map(i => `<option value="${i.id}">#${i.number} · ${fmtDate(i.due_date)} (${money(Math.max(i.total - i.paid_amount,0), l.currency)})</option>`).join("")}
+      </select></label>
+      <div class="form-row"><label>Monto<input name="amount" type="number" step="0.01" min="0.01" required></label>
+      <label>Fecha<input name="date" type="date" required value="${today()}"></label></div>
+      <label>Método<select name="method"><option>bank_transfer</option><option>cash</option><option>check</option><option>card</option><option>other</option></select></label>
+      <label>Referencia<input name="reference"></label>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost" data-cancel>Cancelar</button><button type="submit" class="btn btn-primary">Pagar</button></div>
+    </form>`);
+    const f = d.querySelector("form");
+    const sel = f.inst;
+    const setAmount = () => { const i = l.installments.find(x => x.id === sel.value); f.amount.value = Math.max(i.total - i.paid_amount, 0); };
+    sel.addEventListener("change", setAmount); setAmount();
+    d.querySelector("[data-cancel]").addEventListener("click", () => d.close());
+    f.addEventListener("submit", e => { e.preventDefault();
+      const i = l.installments.find(x => x.id === f.inst.value);
+      const amount = +f.amount.value;
+      const rem = Math.max(i.total - i.paid_amount, 0);
+      if(amount > rem + 0.005){ toast(`Excede el saldo (queda ${money(rem, l.currency)})`, "err"); return; }
+      i.paid_amount = r2(i.paid_amount + amount);
+      i.payments.push({ id: uid(), amount, payment_date: f.date.value, method: f.method.value, reference: f.reference.value || null });
+      save(); d.close(); toast("Pago registrado"); renderLoanDetail(v, id); });
+  });
+}
+
+function renderCompanies(v){
+  v.innerHTML = `<div class="card"><div class="card-head"><h2>Empresas clientes</h2><button class="btn btn-primary" id="btn-new">+ Nueva empresa</button></div>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Empresa</th><th>RUC</th><th>Contacto</th><th>Teléfono</th><th></th></tr></thead><tbody>
+    ${db.companies.map(c => `<tr><td><strong>${c.name}</strong></td><td class="mono">${c.ruc}</td><td>${c.contact_email || "—"}</td><td>${c.contact_phone || "—"}</td>
+      <td><button class="btn btn-sm btn-ghost" data-edit="${c.id}">Editar</button> <button class="btn btn-sm btn-danger" data-del="${c.id}">Eliminar</button></td></tr>`).join("") || `<tr><td colspan="5" class="td-empty">Sin empresas</td></tr>`}
+    </tbody></table></div></div>`;
+  v.querySelector("#btn-new").addEventListener("click", () => form(null, v));
+  v.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => form(db.companies.find(c => c.id === b.dataset.edit), v)));
+  v.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+    const c = db.companies.find(x => x.id === b.dataset.del);
+    const n = db.loans.filter(l => l.company_id === c.id).length;
+    if(confirm(`¿Eliminar a "${c.name}"? También se borrarán ${n} préstamo(s).`)){
+      db.companies = db.companies.filter(x => x.id !== c.id);
+      db.loans = db.loans.filter(l => l.company_id !== c.id);
+      save(); toast("Empresa eliminada"); renderCompanies(v); }
+  }));
+  function form(c, view){
+    const d = openModal(`<form method="dialog" class="modal-body">
+      <h3>${c ? "Editar empresa" : "Nueva empresa"}</h3>
+      <label>Nombre<input name="name" required maxlength="150" value="${c ? c.name : ""}"></label>
+      <label>RUC<input name="ruc" required maxlength="20" value="${c ? c.ruc : ""}"></label>
+      <label>Correo<input name="email" type="email" value="${c ? c.contact_email || "" : ""}"></label>
+      <label>Teléfono<input name="phone" maxlength="30" value="${c ? c.contact_phone || "" : ""}"></label>
+      <div class="modal-actions"><button type="button" class="btn btn-ghost" data-cancel>Cancelar</button><button type="submit" class="btn btn-primary">Guardar</button></div>
+    </form>`);
+    d.querySelector("[data-cancel]").addEventListener("click", () => d.close());
+    d.querySelector("form").addEventListener("submit", e => { e.preventDefault();
+      const f = e.target;
+      if(db.companies.some(x => x.ruc === f.ruc.value.trim() && x.id !== (c && c.id))){ toast("RUC ya registrado", "err"); return; }
+      if(c){ c.name = f.name.value; c.ruc = f.ruc.value; c.contact_email = f.email.value || null; c.contact_phone = f.phone.value || null; }
+      else db.companies.push({ id: uid(), name: f.name.value, ruc: f.ruc.value, contact_email: f.email.value || null, contact_phone: f.phone.value || null, created_at: today() });
+      save(); d.close(); toast(c ? "Empresa actualizada" : "Empresa creada"); renderCompanies(view); });
+  }
+}
+
+function renderReports(v){
+  const all = db.loans.flatMap(l => l.installments);
+  const collected = all.reduce((a, i) => a + i.paid_amount, 0);
+  const loaned = db.loans.reduce((a, l) => a + l.amount, 0);
+  const overdue = all.filter(i => effStatus(i) === "late");
+  const overdueAmt = overdue.reduce((a, i) => a + (i.total - i.paid_amount), 0);
+  const expectedInterest = all.reduce((a, i) => a + i.interest, 0);
+  const paid = all.filter(i => effStatus(i) === "paid").length;
+  const late = overdue.length;
+  const upcoming = all.filter(i => effStatus(i) === "pending").length;
+  const paidPct = all.length ? (paid / all.length * 100) : 0;
+  const latePct = all.length ? (late / all.length * 100) : 0;
+  const byCompany = db.companies.map(c => { const out = db.loans.filter(l => l.company_id === c.id).flatMap(l => l.installments).filter(i => effStatus(i) !== "paid").reduce((a, i) => a + (i.total - i.paid_amount), 0); return { name: c.name, out }; }).sort((a,b) => b.out - a.out);
+  const totalOut = byCompany.reduce((a, x) => a + x.out, 0);
+  const recovery = loaned + collected ? (collected / (loaned + collected) * 100) : 0;
+  v.innerHTML = `
+  <div class="grid-cards">
+    <div class="card stat accent-green"><div class="stat-label">Capital total desembolsado</div><div class="stat-value">${money(loaned)}</div><div class="stat-foot">Tasa de recuperación ${recovery.toFixed(1)}%</div></div>
+    <div class="card stat accent-blue"><div class="stat-label">Recuperado</div><div class="stat-value">${money(collected)}</div><div class="stat-foot">Interés esperado ${money(expectedInterest)}</div></div>
+    <div class="card stat accent-amber"><div class="stat-label">Cartera vencida</div><div class="stat-value">${money(overdueAmt)}</div><div class="stat-foot">${late} cuotas vencidas</div></div>
+    <div class="card stat accent-blue"><div class="stat-label">Salud de cuotas</div><div class="stat-value">${paid}/${all.length}</div><div class="stat-foot">${paidPct.toFixed(1)}% pagadas · ${latePct.toFixed(1)}% vencidas</div></div>
+  </div>
+  <div class="card"><div class="card-head"><h2>Morosidad</h2></div>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Empresa</th><th>Cuota</th><th>Vencimiento</th><th>Días de atraso</th><th>Por cobrar</th></tr></thead><tbody>
+    ${db.loans.flatMap(l => l.installments.filter(i => effStatus(i) === "late").map(i => ({ ...i, company: companyOf(l).name, currency: l.currency }))).sort((a,b) => a.due_date.localeCompare(b.due_date)).map(i =>
+      `<tr><td><strong>${i.company}</strong></td><td>#${i.number}</td><td>${fmtDate(i.due_date)}</td><td class="danger">${daysBetween(i.due_date, today())} días</td><td>${money(i.total - i.paid_amount, i.currency)}</td></tr>`).join("") || `<tr><td colspan="5" class="td-empty">¡Sin cuotas vencidas!</td></tr>`}
+    </tbody></table></div></div>
+  <div class="grid-2">
+    <div class="card"><div class="card-head"><h2>Salud del portafolio</h2></div>
+      <div class="bars">
+        <div class="bar-row"><span>Pagadas</span><div class="bar-track"><div class="bar-fill green" style="width:${paidPct}%"></div></div><span>${paid} (${paidPct.toFixed(1)}%)</span></div>
+        <div class="bar-row"><span>Por vencer</span><div class="bar-track"><div class="bar-fill blue" style="width:${Math.max(100 - paidPct - latePct, 0)}%"></div></div><span>${upcoming}</span></div>
+        <div class="bar-row"><span>Vencidas</span><div class="bar-track"><div class="bar-fill red" style="width:${latePct}%"></div></div><span>${late} (${latePct.toFixed(1)}%)</span></div>
+      </div>
+      <h3 class="subtitle">Concentración por empresa</h3>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Empresa</th><th>Por cobrar</th><th>% del total</th><th>Rating</th></tr></thead><tbody>
+      ${byCompany.map(x => { const share = totalOut ? x.out / totalOut * 100 : 0; const rt = share >= 50 ? "ALTO" : share >= 25 ? "MEDIO" : "BAJO";
+        return `<tr><td><strong>${x.name}</strong></td><td>${money(x.out)}</td><td>${share.toFixed(1)}%</td><td><span class="badge ${rt==="ALTO"?"badge-late":rt==="MEDIO"?"badge-active":"badge-paid"}">${rt}</span></td></tr>`; }).join("")}
+      </tbody></table></div>
+    </div>
+    <div class="card"><div class="card-head"><h2>Simulador de amortización</h2></div>
+      <div class="sim-form"><div class="form-row">
+        <label>Monto<input id="s-amount" type="number" min="1" value="50000"></label>
+        <label>Tasa anual (%)<input id="s-rate" type="number" min="0.1" value="12"></label></div>
+        <div class="form-row"><label>Plazo (meses)<input id="s-months" type="number" min="1" max="360" value="12"></label>
+        <button class="btn btn-primary" id="s-run" style="margin-top:22px">Calcular</button></div></div>
+      <div id="s-result"></div>
+    </div>
+  </div>`;
+  const run = () => {
+    const a = +v.querySelector("#s-amount").value, r = +v.querySelector("#s-rate").value / 100, m = +v.querySelector("#s-months").value;
+    if(!a || !r || !m) return;
+    const s = frenchSchedule(a, r, m, today());
+    const total = s.reduce((x, i) => x + i.total, 0);
+    v.querySelector("#s-result").innerHTML = `
+      <div class="preview">
+        <div class="preview-row"><span>Cuota mensual</span><strong>${money(s[0].total)}</strong></div>
+        <div class="preview-row"><span>Total a pagar</span><strong>${money(total)}</strong></div>
+        <div class="preview-row"><span>Interés total</span><strong>${money(total - a)}</strong></div>
+      </div>
+      <div class="table-wrap sim-table" style="margin-top:12px"><table class="table"><thead><tr><th>N°</th><th>Vence</th><th>Cuota</th><th>Capital</th><th>Interés</th><th>Saldo</th></tr></thead><tbody>
+      ${s.map(x => `<tr><td>${x.number}</td><td>${fmtDate(x.due_date)}</td><td>${money(x.total)}</td><td>${money(x.principal)}</td><td>${money(x.interest)}</td><td>${money(x.balance)}</td></tr>`).join("")}
+      </tbody></table></div>`;
+  };
+  v.querySelector("#s-run").addEventListener("click", run); run();
+}
+
+/* ============ Router ============ */
+const titles = { dashboard: "Panel", loans: "Préstamos", companies: "Empresas", reports: "Reportes" };
+function navigate(){
+  const hash = (location.hash.replace(/^#\/?/, "") || "dashboard");
+  const [route, param] = hash.split("/");
+  document.querySelectorAll("[data-nav]").forEach(el => el.classList.toggle("active", el.getAttribute("data-nav") === route));
+  document.getElementById("page-title").textContent = titles[route] || "PrestaPro";
+  const v = document.getElementById("view");
+  if(route === "companies") renderCompanies(v);
+  else if(route === "reports") renderReports(v);
+  else if(route === "loans" && param) renderLoanDetail(v, param);
+  else if(route === "loans") renderLoans(v);
+  else renderDashboard(v);
+}
+window.addEventListener("hashchange", navigate);
+setInterval(() => { const c = document.getElementById("clock"); if(c) c.textContent = new Date().toLocaleString("es-PE", { dateStyle: "full", timeStyle: "short" }); }, 1000);
+navigate();
+</script>
+</body>
+</html>
